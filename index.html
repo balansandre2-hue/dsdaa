@@ -394,6 +394,12 @@
 
         // --- FUNCTIONS ---
 
+        // Global function to handle broken images
+        window.handleImageError = function(img) {
+            img.onerror = null; // Prevent infinite loop
+            img.src = "https://placehold.co/600x400/171717/333333?text=No+Image";
+        }
+
         function init() {
             renderCategories();
             renderProducts();
@@ -472,7 +478,7 @@
                     ${product.tag ? `<div class="absolute top-3 left-3 z-10 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg">${product.tag}</div>` : ''}
                     
                     <div class="relative aspect-[5/4] overflow-hidden bg-neutral-800">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" onerror="this.src='https://placehold.co/600x400/171717/333333?text=No+Image'">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" onerror="handleImageError(this)">
                         <div class="absolute top-3 right-3 bg-neutral-900/80 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-gray-300 border border-neutral-700/50 uppercase tracking-wide">
                             ${product.specs.type || 'Gear'}
                         </div>
@@ -577,7 +583,7 @@
                 els.cartItems.innerHTML = cart.map(item => `
                     <div class="flex gap-4 bg-neutral-800/40 p-3 rounded-xl border border-neutral-800 group hover:border-neutral-700 transition-colors">
                         <div class="w-20 h-20 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
-                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" onerror="handleImageError(this)">
                         </div>
                         <div class="flex-1 flex flex-col justify-between">
                             <div>
