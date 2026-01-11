@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShoppingCart, Menu, X, Crosshair, Shield, Zap, Search, 
-  ChevronRight, Trash2, CheckCircle, Star, Send, ArrowRight, User, Phone 
+  ChevronRight, Trash2, CheckCircle, Star, Send, ArrowRight, Phone 
 } from 'lucide-react';
 
 // --- Mock Data (Данные товаров) ---
@@ -9,10 +9,10 @@ const PRODUCTS = [
   {
     id: 1,
     name: "AK-74M E&L Gen.2",
-    price: 75500,
-    oldPrice: 120000,
+    price: 28500,
+    oldPrice: 32000,
     category: "rifles",
-    image: "https://placehold.co/600x400/2f3e30/ffffff?text=AK-74M+Tactical",
+    image: "https://placehold.co/600x400/2f3e30/ffffff?text=AK-74M",
     specs: { speed: "130 м/с", type: "AEG", material: "Сталь/Пластик" },
     rating: 5,
     reviews: 12,
@@ -24,7 +24,7 @@ const PRODUCTS = [
     name: "M4A1 SOPMOD Cyma",
     price: 18900,
     category: "rifles",
-    image: "https://placehold.co/600x400/1a202c/ffffff?text=M4A1+SOPMOD",
+    image: "https://placehold.co/600x400/1a202c/ffffff?text=M4A1",
     specs: { speed: "120 м/с", type: "AEG", material: "Алюминий" },
     rating: 4,
     reviews: 8,
@@ -35,7 +35,7 @@ const PRODUCTS = [
     name: "Glock 17 Gen.4 WE",
     price: 9500,
     category: "pistols",
-    image: "https://placehold.co/600x400/333333/ffffff?text=Glock+17+Gen4",
+    image: "https://placehold.co/600x400/333333/ffffff?text=Glock+17",
     specs: { speed: "95 м/с", type: "GBB (Gas)", material: "Металл/Пластик" },
     rating: 5,
     reviews: 24,
@@ -47,7 +47,7 @@ const PRODUCTS = [
     name: "Снайперская винтовка VSR-10",
     price: 14200,
     category: "snipers",
-    image: "https://placehold.co/600x400/4a5568/ffffff?text=VSR-10+Pro",
+    image: "https://placehold.co/600x400/4a5568/ffffff?text=VSR-10",
     specs: { speed: "150 м/с", type: "Spring", material: "Пластик/Металл" },
     rating: 4,
     reviews: 5,
@@ -58,7 +58,7 @@ const PRODUCTS = [
     name: "Плитник 6094 (Multicam)",
     price: 5500,
     category: "gear",
-    image: "https://placehold.co/600x400/553c2a/ffffff?text=Plate+Carrier+6094",
+    image: "https://placehold.co/600x400/553c2a/ffffff?text=Plate+Carrier",
     specs: { color: "Multicam", size: "Universal", type: "Plate Carrier" },
     rating: 5,
     reviews: 18,
@@ -69,7 +69,7 @@ const PRODUCTS = [
     name: "Colt 1911 KJW CO2",
     price: 11000,
     category: "pistols",
-    image: "https://placehold.co/600x400/2d3748/ffffff?text=Colt+1911+CO2",
+    image: "https://placehold.co/600x400/2d3748/ffffff?text=Colt+1911",
     specs: { speed: "105 м/с", type: "CO2 GBB", material: "Полный металл" },
     rating: 4,
     reviews: 9,
@@ -82,7 +82,7 @@ const PRODUCTS = [
     price: 24000,
     oldPrice: 26500,
     category: "rifles",
-    image: "https://placehold.co/600x400/171717/ffffff?text=HK416+Devgru",
+    image: "https://placehold.co/600x400/171717/ffffff?text=HK416",
     specs: { speed: "125 м/с", type: "AEG", material: "Алюминий" },
     rating: 5,
     reviews: 15,
@@ -94,7 +94,7 @@ const PRODUCTS = [
     name: "Очки Pyramex I-Force",
     price: 2100,
     category: "gear",
-    image: "https://placehold.co/600x400/718096/ffffff?text=Pyramex+Safety",
+    image: "https://placehold.co/600x400/718096/ffffff?text=Pyramex",
     specs: { rating: "ANSI Z87.1", type: "Баллистические", lens: "Anti-Fog" },
     rating: 5,
     reviews: 42,
@@ -110,13 +110,27 @@ const CATEGORIES = [
   { id: 'gear', name: 'Снаряжение' },
 ];
 
+// Вспомогательный компонент рейтинга (вынесен из App для избежания ошибок ре-рендера)
+const RatingStars = ({ rating }) => (
+  <div className="flex text-yellow-500">
+    {[...Array(5)].map((_, i) => (
+      <Star 
+        key={i} 
+        size={14} 
+        fill={i < rating ? "currentColor" : "none"} 
+        className={i < rating ? "text-yellow-500" : "text-neutral-600"} 
+      />
+    ))}
+  </div>
+);
+
 export default function App() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showOrderForm, setShowOrderForm] = useState(false); // New state for order form
+  const [showOrderForm, setShowOrderForm] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   // Form State
@@ -125,14 +139,14 @@ export default function App() {
     telegram: ''
   });
 
-  // --- Logic ---
-
+  // Логика фильтрации
   const filteredProducts = PRODUCTS.filter(product => {
     const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
+  // Логика корзины
   const addToCart = (product) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
@@ -163,7 +177,7 @@ export default function App() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
-  // New checkout flow
+  // Оформление заказа
   const handleInitCheckout = () => {
     setIsCartOpen(false);
     setShowOrderForm(true);
@@ -171,12 +185,10 @@ export default function App() {
 
   const handleFinalizeOrder = (e) => {
     e.preventDefault();
-    // Here you would typically send data to backend
-    // For now we just simulate success
     setShowOrderForm(false);
     setShowSuccessModal(true);
     setCart([]);
-    setFormData({ phone: '', telegram: '' }); // Reset form
+    setFormData({ phone: '', telegram: '' });
     setTimeout(() => setShowSuccessModal(false), 5000);
   };
 
@@ -188,15 +200,10 @@ export default function App() {
     }));
   };
 
-  // --- Components ---
-
-  const RatingStars = ({ rating }) => (
-    <div className="flex text-yellow-500">
-      {[...Array(5)].map((_, i) => (
-        <Star key={i} size={14} fill={i < rating ? "currentColor" : "none"} className={i < rating ? "text-yellow-500" : "text-neutral-600"} />
-      ))}
-    </div>
-  );
+  // Обработка ошибок картинок
+  const handleImageError = (e) => {
+    e.target.src = "https://placehold.co/600x400/171717/333333?text=No+Image";
+  };
 
   return (
     <div className="min-h-screen bg-neutral-950 text-gray-100 font-sans selection:bg-emerald-600 selection:text-white">
@@ -418,6 +425,7 @@ export default function App() {
                   <img 
                     src={product.image} 
                     alt={product.name} 
+                    onError={handleImageError}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100"
                   />
                   <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-neutral-900 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -516,7 +524,12 @@ export default function App() {
               cart.map(item => (
                 <div key={item.id} className="flex gap-4 bg-neutral-800/40 p-3 rounded-xl border border-neutral-800 group hover:border-neutral-700 transition-colors">
                   <div className="w-20 h-20 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    <img 
+                      src={item.image} 
+                      alt={item.name} 
+                      onError={handleImageError}
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
