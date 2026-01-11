@@ -1,751 +1,650 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  ShoppingCart, Menu, X, Crosshair, Shield, Zap, Search, 
-  ChevronRight, Trash2, CheckCircle, Star, Send, ArrowRight, Phone 
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TacticalZone | Страйкбольный магазин</title>
+    
+    <!-- Подключаем Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Подключаем Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-// --- Mock Data (Данные товаров) ---
-const PRODUCTS = [
-  {
-    id: 1,
-    name: "AK-74M E&L Gen.2",
-    price: 28500,
-    oldPrice: 32000,
-    category: "rifles",
-    image: "https://placehold.co/600x400/2f3e30/ffffff?text=AK-74M",
-    specs: { speed: "130 м/с", type: "AEG", material: "Сталь/Пластик" },
-    rating: 5,
-    reviews: 12,
-    tag: "Хит",
-    description: "Легендарная надежность. Стальной корпус, усиленный гирбокс, идеален для леса."
-  },
-  {
-    id: 2,
-    name: "M4A1 SOPMOD Cyma",
-    price: 18900,
-    category: "rifles",
-    image: "https://placehold.co/600x400/1a202c/ffffff?text=M4A1",
-    specs: { speed: "120 м/с", type: "AEG", material: "Алюминий" },
-    rating: 4,
-    reviews: 8,
-    description: "Модульная платформа AR-15. Рис-цевье для установки фонарей, ЛЦУ и рукояток."
-  },
-  {
-    id: 3,
-    name: "Glock 17 Gen.4 WE",
-    price: 9500,
-    category: "pistols",
-    image: "https://placehold.co/600x400/333333/ffffff?text=Glock+17",
-    specs: { speed: "95 м/с", type: "GBB (Gas)", material: "Металл/Пластик" },
-    rating: 5,
-    reviews: 24,
-    tag: "Топ",
-    description: "Полная копийность, мощная отдача (Blowback). Работает на Green Gas."
-  },
-  {
-    id: 4,
-    name: "Снайперская винтовка VSR-10",
-    price: 14200,
-    category: "snipers",
-    image: "https://placehold.co/600x400/4a5568/ffffff?text=VSR-10",
-    specs: { speed: "150 м/с", type: "Spring", material: "Пластик/Металл" },
-    rating: 4,
-    reviews: 5,
-    description: "Болтовка для начинающих снайперов. Легкий взвод и высокая точность из коробки."
-  },
-  {
-    id: 5,
-    name: "Плитник 6094 (Multicam)",
-    price: 5500,
-    category: "gear",
-    image: "https://placehold.co/600x400/553c2a/ffffff?text=Plate+Carrier",
-    specs: { color: "Multicam", size: "Universal", type: "Plate Carrier" },
-    rating: 5,
-    reviews: 18,
-    description: "Классический плитник с системой MOLLE. Подходит для плит Гранит и SAPI."
-  },
-  {
-    id: 6,
-    name: "Colt 1911 KJW CO2",
-    price: 11000,
-    category: "pistols",
-    image: "https://placehold.co/600x400/2d3748/ffffff?text=Colt+1911",
-    specs: { speed: "105 м/с", type: "CO2 GBB", material: "Полный металл" },
-    rating: 4,
-    reviews: 9,
-    tag: "Мощь",
-    description: "Тяжелый металлический пистолет. Работает на CO2, пробивает плотную одежду."
-  },
-  {
-    id: 7,
-    name: "HK416 East Crane",
-    price: 24000,
-    oldPrice: 26500,
-    category: "rifles",
-    image: "https://placehold.co/600x400/171717/ffffff?text=HK416",
-    specs: { speed: "125 м/с", type: "AEG", material: "Алюминий" },
-    rating: 5,
-    reviews: 15,
-    tag: "New",
-    description: "Выбор спецназа. Эргономичная рукоять, надежная внутрянка, маркировки."
-  },
-  {
-    id: 8,
-    name: "Очки Pyramex I-Force",
-    price: 2100,
-    category: "gear",
-    image: "https://placehold.co/600x400/718096/ffffff?text=Pyramex",
-    specs: { rating: "ANSI Z87.1", type: "Баллистические", lens: "Anti-Fog" },
-    rating: 5,
-    reviews: 42,
-    description: "Двойная линза (термопакет), не запотевают даже при активном беге."
-  }
-];
+    <!-- Настройка шрифтов (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 
-const CATEGORIES = [
-  { id: 'all', name: 'Все товары' },
-  { id: 'rifles', name: 'Приводы (AEG)' },
-  { id: 'pistols', name: 'Пистолеты' },
-  { id: 'snipers', name: 'Снайпинг' },
-  { id: 'gear', name: 'Снаряжение' },
-];
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Скроллбар для Webkit */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #171717; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
 
-// Вспомогательный компонент рейтинга (вынесен из App для избежания ошибок ре-рендера)
-const RatingStars = ({ rating }) => (
-  <div className="flex text-yellow-500">
-    {[...Array(5)].map((_, i) => (
-      <Star 
-        key={i} 
-        size={14} 
-        fill={i < rating ? "currentColor" : "none"} 
-        className={i < rating ? "text-yellow-500" : "text-neutral-600"} 
-      />
-    ))}
-  </div>
-);
+        /* Анимации для модальных окон и переходов */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .slide-in-right { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .slide-out-right { animation: slideOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .zoom-in { animation: zoomIn 0.3s ease-out forwards; }
 
-export default function App() {
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [cart, setCart] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showOrderForm, setShowOrderForm] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  
-  // Form State
-  const [formData, setFormData] = useState({
-    phone: '',
-    telegram: ''
-  });
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes slideOutRight { from { transform: translateX(0); } to { transform: translateX(100%); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    </style>
 
-  // Логика фильтрации
-  const filteredProducts = PRODUCTS.filter(product => {
-    const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neutral: { 850: '#1f1f1f', 950: '#0a0a0a' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-neutral-950 text-gray-100 selection:bg-emerald-600 selection:text-white overflow-x-hidden">
 
-  // Логика корзины
-  const addToCart = (product) => {
-    setCart(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item => 
-          item.id === product.id ? { ...item, qty: item.qty + 1 } : item
-        );
-      }
-      return [...prev, { ...product, qty: 1 }];
-    });
-    setIsCartOpen(true);
-  };
-
-  const removeFromCart = (id) => {
-    setCart(prev => prev.filter(item => item.id !== id));
-  };
-
-  const updateQty = (id, delta) => {
-    setCart(prev => prev.map(item => {
-      if (item.id === id) {
-        const newQty = Math.max(1, item.qty + delta);
-        return { ...item, qty: newQty };
-      }
-      return item;
-    }));
-  };
-
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
-
-  // Оформление заказа
-  const handleInitCheckout = () => {
-    setIsCartOpen(false);
-    setShowOrderForm(true);
-  };
-
-  const handleFinalizeOrder = (e) => {
-    e.preventDefault();
-    setShowOrderForm(false);
-    setShowSuccessModal(true);
-    setCart([]);
-    setFormData({ phone: '', telegram: '' });
-    setTimeout(() => setShowSuccessModal(false), 5000);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Обработка ошибок картинок
-  const handleImageError = (e) => {
-    e.target.src = "https://placehold.co/600x400/171717/333333?text=No+Image";
-  };
-
-  return (
-    <div className="min-h-screen bg-neutral-950 text-gray-100 font-sans selection:bg-emerald-600 selection:text-white">
-      
-      {/* Floating Telegram Button */}
-      <a 
-        href="https://t.me/lkx_kxl" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-40 bg-sky-500 hover:bg-sky-600 text-white p-4 rounded-full shadow-lg shadow-sky-500/30 transition-all hover:scale-110 flex items-center gap-2 group"
-      >
-        <Send size={24} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
-        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap font-bold text-sm">
+    <!-- Floating Telegram Button -->
+    <a href="https://t.me/lkx_kxl" target="_blank" rel="noopener noreferrer"
+       class="fixed bottom-6 right-6 z-40 bg-sky-500 hover:bg-sky-600 text-white p-4 rounded-full shadow-lg shadow-sky-500/30 transition-all hover:scale-110 flex items-center gap-2 group">
+        <i data-lucide="send" class="w-6 h-6 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform"></i>
+        <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap font-bold text-sm">
           Написать в TG
         </span>
-      </a>
+    </a>
 
-      {/* Navbar */}
-      <nav className="sticky top-0 z-40 bg-neutral-900/90 backdrop-blur-md border-b border-neutral-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            
-            {/* Logo */}
-            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setActiveCategory('all')}>
-              <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-2 rounded-lg text-white shadow-lg shadow-emerald-900/50 group-hover:shadow-emerald-500/20 transition-all">
-                <Crosshair size={28} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-black tracking-widest text-white leading-none">TACTICAL</span>
-                <span className="text-sm font-bold text-emerald-500 tracking-[0.2em] leading-none">ZONE</span>
-              </div>
-            </div>
-
-            {/* Desktop Menu */}
-            <div className="hidden lg:flex items-center space-x-1 bg-neutral-800/50 p-1.5 rounded-full border border-neutral-700/50">
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                    activeCategory === cat.id 
-                      ? 'bg-neutral-700 text-emerald-400 shadow-sm' 
-                      : 'text-gray-400 hover:text-white hover:bg-neutral-800'
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-
-            {/* Icons */}
-            <div className="flex items-center gap-4">
-              <div className="relative hidden md:block group">
-                <input 
-                  type="text" 
-                  placeholder="Поиск экипировки..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-neutral-800 border border-neutral-700 rounded-full py-2 px-4 pl-10 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 w-48 transition-all focus:w-64 group-hover:border-neutral-600"
-                />
-                <Search className="absolute left-3 top-2.5 text-gray-500 group-hover:text-gray-300 transition-colors" size={16} />
-              </div>
-
-              <button 
-                className="relative p-2.5 bg-neutral-800 rounded-full text-gray-400 hover:text-white hover:bg-neutral-700 transition-all border border-transparent hover:border-neutral-600"
-                onClick={() => setIsCartOpen(true)}
-              >
-                <ShoppingCart size={22} />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-emerald-600 rounded-full border-2 border-neutral-900">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-
-              <button 
-                className="lg:hidden p-2 text-gray-400 hover:text-white"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              >
-                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden bg-neutral-900 border-b border-neutral-700 animate-in slide-in-from-top-5">
-            <div className="px-4 pt-2 pb-6 space-y-2">
-              <input 
-                type="text" 
-                placeholder="Поиск..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-neutral-800 border border-neutral-700 rounded-lg py-2 px-4 mb-4 text-sm focus:outline-none focus:border-emerald-500"
-              />
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setActiveCategory(cat.id);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`block w-full text-left px-4 py-3 rounded-xl text-base font-bold transition-colors ${
-                     activeCategory === cat.id 
-                      ? 'bg-neutral-800 text-emerald-500 border border-neutral-700' 
-                      : 'text-gray-400 hover:bg-neutral-800/50 hover:text-white'
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero Section */}
-      <div className="relative bg-neutral-900 overflow-hidden min-h-[500px] flex items-center">
-        {/* Background Overlay with Gradient */}
-        <div className="absolute inset-0 bg-[url('https://placehold.co/1920x800/0f1110/333333?text=Tactical+Warfare')] bg-cover bg-center opacity-40"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/80 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-neutral-950 to-transparent"></div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-6">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Новое поступление 2024
-            </div>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white leading-[1.1] mb-6">
-              ТВОЕ <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">ПРЕВОСХОДСТВО</span><br/>
-              НА ПОЛЕ БОЯ
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-400 mb-8 max-w-lg leading-relaxed">
-              Экипировка профессионального уровня. Приводы, прошедшие проверку боем. 
-              Гарантия качества и поддержка 24/7.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button 
-                onClick={() => setActiveCategory('all')}
-                className="group flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white text-lg font-bold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:-translate-y-1"
-              >
-                Открыть каталог
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-              <a 
-                href="https://t.me/lkx_kxl"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-neutral-800 hover:bg-neutral-700 text-white text-lg font-bold rounded-xl border border-neutral-700 hover:border-neutral-600 transition-all hover:-translate-y-1"
-              >
-                <Send size={18} className="text-sky-400" />
-                Написать менеджеру
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Features */}
-      <div className="py-16 bg-neutral-950 border-y border-neutral-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { icon: Shield, title: "Гарантия 1 год", desc: "Бесплатный ремонт и обслуживание" },
-              { icon: Zap, title: "Быстрая доставка", desc: "Отправка СДЭК в день заказа" },
-              { icon: CheckCircle, title: "Проверено", desc: "Контроль качества (хронометрирование)" }
-            ].map((feature, idx) => (
-              <div key={idx} className="flex items-start gap-4 p-6 rounded-2xl bg-neutral-900/50 border border-neutral-800 hover:border-emerald-500/30 transition-colors group">
-                <div className="p-3 bg-neutral-800 rounded-xl text-emerald-500 group-hover:bg-emerald-500/10 group-hover:scale-110 transition-all">
-                  <feature.icon size={28} />
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-40 bg-neutral-900/90 backdrop-blur-md border-b border-neutral-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="setCategory('all')">
+                    <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 p-2 rounded-lg text-white shadow-lg shadow-emerald-900/50 group-hover:shadow-emerald-500/20 transition-all">
+                        <i data-lucide="crosshair" class="w-7 h-7"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xl font-black tracking-widest text-white leading-none">TACTICAL</span>
+                        <span class="text-sm font-bold text-emerald-500 tracking-[0.2em] leading-none">ZONE</span>
+                    </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white mb-1">{feature.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{feature.desc}</p>
+
+                <!-- Desktop Menu -->
+                <div class="hidden lg:flex items-center space-x-1 bg-neutral-800/50 p-1.5 rounded-full border border-neutral-700/50" id="desktop-menu">
+                    <!-- Categories injected by JS -->
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Products Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
-              {CATEGORIES.find(c => c.id === activeCategory)?.name || 'Каталог'}
-            </h2>
-            <p className="text-gray-500">
-              Найдено {filteredProducts.length} позиций тактического снаряжения
-            </p>
-          </div>
+                <!-- Icons & Mobile Toggle -->
+                <div class="flex items-center gap-4">
+                    <div class="relative hidden md:block group">
+                        <input type="text" id="search-input" placeholder="Поиск экипировки..." 
+                               class="bg-neutral-800 border border-neutral-700 rounded-full py-2 px-4 pl-10 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 w-48 transition-all focus:w-64 group-hover:border-neutral-600">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-500 w-4 h-4 group-hover:text-gray-300 transition-colors"></i>
+                    </div>
+
+                    <button onclick="toggleCart(true)" class="relative p-2.5 bg-neutral-800 rounded-full text-gray-400 hover:text-white hover:bg-neutral-700 transition-all border border-transparent hover:border-neutral-600">
+                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                        <span id="cart-badge" class="hidden absolute -top-1 -right-1 items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-emerald-600 rounded-full border-2 border-neutral-900">0</span>
+                    </button>
+
+                    <button class="lg:hidden p-2 text-gray-400 hover:text-white" onclick="toggleMobileMenu()">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        {filteredProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-500 bg-neutral-900/30 rounded-3xl border border-neutral-800 border-dashed">
-            <Search size={48} className="mb-4 opacity-20" />
-            <p className="text-xl font-medium">По вашему запросу ничего не найдено.</p>
-            <button onClick={() => {setSearchQuery(''); setActiveCategory('all')}} className="mt-4 text-emerald-500 hover:text-emerald-400 font-bold underline decoration-2 underline-offset-4">
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-neutral-900 border-b border-neutral-700">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <input type="text" id="mobile-search-input" placeholder="Поиск..." 
+                       class="w-full bg-neutral-800 border border-neutral-700 rounded-lg py-2 px-4 mb-4 text-sm focus:outline-none focus:border-emerald-500 text-white">
+                <div id="mobile-menu-items">
+                    <!-- Mobile items injected by JS -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative bg-neutral-900 overflow-hidden min-h-[500px] flex items-center">
+        <div class="absolute inset-0 bg-[url('https://placehold.co/1920x800/0f1110/333333?text=Tactical+Warfare')] bg-cover bg-center opacity-40"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/80 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-neutral-950 to-transparent"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
+            <div class="max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-6">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Новое поступление 2024
+                </div>
+                <h1 class="text-5xl sm:text-6xl md:text-7xl font-black text-white leading-[1.1] mb-6">
+                    ТВОЕ <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">ПРЕВОСХОДСТВО</span><br/>
+                    НА ПОЛЕ БОЯ
+                </h1>
+                <p class="text-lg sm:text-xl text-gray-400 mb-8 max-w-lg leading-relaxed">
+                    Экипировка профессионального уровня. Приводы, прошедшие проверку боем. 
+                    Гарантия качества и поддержка 24/7.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button onclick="scrollToCatalog()" class="group flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white text-lg font-bold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:-translate-y-1">
+                        Открыть каталог
+                        <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                    <a href="https://t.me/lkx_kxl" target="_blank" class="flex items-center justify-center gap-2 px-8 py-4 bg-neutral-800 hover:bg-neutral-700 text-white text-lg font-bold rounded-xl border border-neutral-700 hover:border-neutral-600 transition-all hover:-translate-y-1">
+                        <i data-lucide="send" class="w-4 h-4 text-sky-400"></i>
+                        Написать менеджеру
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="py-16 bg-neutral-950 border-y border-neutral-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="flex items-start gap-4 p-6 rounded-2xl bg-neutral-900/50 border border-neutral-800 hover:border-emerald-500/30 transition-colors group">
+                    <div class="p-3 bg-neutral-800 rounded-xl text-emerald-500 group-hover:bg-emerald-500/10 group-hover:scale-110 transition-all">
+                        <i data-lucide="shield" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-1">Гарантия 1 год</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Бесплатный ремонт и обслуживание</p>
+                    </div>
+                </div>
+                <!-- Feature 2 -->
+                <div class="flex items-start gap-4 p-6 rounded-2xl bg-neutral-900/50 border border-neutral-800 hover:border-emerald-500/30 transition-colors group">
+                    <div class="p-3 bg-neutral-800 rounded-xl text-emerald-500 group-hover:bg-emerald-500/10 group-hover:scale-110 transition-all">
+                        <i data-lucide="zap" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-1">Быстрая доставка</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Отправка СДЭК в день заказа</p>
+                    </div>
+                </div>
+                <!-- Feature 3 -->
+                <div class="flex items-start gap-4 p-6 rounded-2xl bg-neutral-900/50 border border-neutral-800 hover:border-emerald-500/30 transition-colors group">
+                    <div class="p-3 bg-neutral-800 rounded-xl text-emerald-500 group-hover:bg-emerald-500/10 group-hover:scale-110 transition-all">
+                        <i data-lucide="check-circle" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-1">Проверено</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Контроль качества (хронометрирование)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catalog Section -->
+    <div id="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+            <div>
+                <h2 id="category-title" class="text-3xl md:text-4xl font-bold text-white mb-2">Каталог</h2>
+                <p id="products-count" class="text-gray-500">Найдено 0 позиций</p>
+            </div>
+        </div>
+
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Products will be injected here -->
+        </div>
+        
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-gray-500 bg-neutral-900/30 rounded-3xl border border-neutral-800 border-dashed">
+            <i data-lucide="search" class="w-12 h-12 mb-4 opacity-20"></i>
+            <p class="text-xl font-medium">По вашему запросу ничего не найдено.</p>
+            <button onclick="setCategory('all'); document.getElementById('search-input').value = ''" class="mt-4 text-emerald-500 hover:text-emerald-400 font-bold underline decoration-2 underline-offset-4">
               Показать все товары
             </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map(product => (
-              <div key={product.id} className="group bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-900/10 flex flex-col relative">
-                
-                {/* Tags */}
-                {product.tag && (
-                  <div className="absolute top-3 left-3 z-10 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg shadow-emerald-900/50">
-                    {product.tag}
-                  </div>
-                )}
-                
-                {/* Image Area */}
-                <div className="relative aspect-[5/4] overflow-hidden bg-neutral-800">
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    onError={handleImageError}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-neutral-900 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  
-                  {/* Type Badge */}
-                  <div className="absolute top-3 right-3 bg-neutral-900/80 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-gray-300 border border-neutral-700/50 uppercase tracking-wide">
-                    {product.specs.type}
-                  </div>
-                </div>
-                
-                {/* Content */}
-                <div className="p-5 flex-1 flex flex-col">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <RatingStars rating={product.rating} />
-                      <span className="text-xs text-gray-500">({product.reviews})</span>
-                    </div>
-                    
-                    <h3 className="text-lg font-bold text-white mb-2 leading-tight group-hover:text-emerald-400 transition-colors">
-                      {product.name}
-                    </h3>
-                    
-                    <p className="text-gray-400 text-sm mb-4 line-clamp-2 leading-relaxed">
-                      {product.description}
-                    </p>
-                    
-                    {/* Compact Specs */}
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      {Object.entries(product.specs).slice(0, 2).map(([key, value]) => (
-                        <div key={key} className="bg-neutral-800/50 rounded px-2 py-1.5 border border-neutral-800">
-                          <p className="text-[10px] text-gray-500 uppercase tracking-wider">{key}</p>
-                          <p className="text-xs font-medium text-gray-200 truncate">{value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-800">
-                    <div>
-                      {product.oldPrice && (
-                        <span className="text-xs text-gray-500 line-through block mb-0.5">{product.oldPrice.toLocaleString('ru-RU')} ₽</span>
-                      )}
-                      <span className="text-xl font-bold text-emerald-400">{product.price.toLocaleString('ru-RU')} ₽</span>
-                    </div>
-                    <button 
-                      onClick={() => addToCart(product)}
-                      className="bg-neutral-800 hover:bg-emerald-600 text-white w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 group/btn"
-                    >
-                      <ShoppingCart size={20} className="text-emerald-500 group-hover/btn:text-white transition-colors" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Cart Drawer */}
-      <div className={`fixed inset-0 z-50 overflow-hidden ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
-        <div 
-          className={`absolute inset-0 bg-neutral-950/80 backdrop-blur-sm transition-opacity duration-500 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`}
-          onClick={() => setIsCartOpen(false)}
-        />
-        
-        <div className={`absolute right-0 top-0 bottom-0 w-full max-w-md bg-neutral-900 border-l border-neutral-800 shadow-2xl transform transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-          
-          <div className="flex items-center justify-between p-6 border-b border-neutral-800">
-            <div>
-              <h2 className="text-xl font-bold text-white">Корзина</h2>
-              <p className="text-sm text-gray-500">{cartCount} позиций</p>
-            </div>
-            <button 
-              onClick={() => setIsCartOpen(false)} 
-              className="p-2 bg-neutral-800 rounded-full text-gray-400 hover:text-white hover:bg-neutral-700 transition-colors"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {cart.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-4">
-                <div className="p-6 bg-neutral-800 rounded-full opacity-50">
-                  <ShoppingCart size={40} />
-                </div>
-                <p className="text-lg font-medium">Корзина пуста</p>
-                <button 
-                  onClick={() => setIsCartOpen(false)}
-                  className="text-emerald-500 hover:text-emerald-400 font-bold"
-                >
-                  Перейти в каталог
-                </button>
-              </div>
-            ) : (
-              cart.map(item => (
-                <div key={item.id} className="flex gap-4 bg-neutral-800/40 p-3 rounded-xl border border-neutral-800 group hover:border-neutral-700 transition-colors">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
-                    <img 
-                      src={item.image} 
-                      alt={item.name} 
-                      onError={handleImageError}
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <h4 className="font-bold text-white text-sm line-clamp-2 leading-snug">{item.name}</h4>
-                      <p className="text-emerald-400 font-bold mt-1">{item.price.toLocaleString('ru-RU')} ₽</p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center gap-3 bg-neutral-900 rounded-lg p-1 border border-neutral-800">
-                        <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white rounded hover:bg-neutral-800">-</button>
-                        <span className="text-sm font-bold min-w-[1.5rem] text-center">{item.qty}</span>
-                        <button onClick={() => updateQty(item.id, 1)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white rounded hover:bg-neutral-800">+</button>
-                      </div>
-                      <button 
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-red-500/50 hover:text-red-500 p-1.5 rounded hover:bg-red-500/10 transition-colors"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          {cart.length > 0 && (
-            <div className="p-6 border-t border-neutral-800 bg-neutral-900/50 backdrop-blur">
-              <div className="space-y-2 mb-6">
-                <div className="flex justify-between text-sm text-gray-400">
-                  <span>Товары ({cartCount})</span>
-                  <span>{cartTotal.toLocaleString('ru-RU')} ₽</span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-400">
-                  <span>Скидка</span>
-                  <span className="text-emerald-500">-0 ₽</span>
-                </div>
-                <div className="flex justify-between items-center pt-4 border-t border-neutral-800 text-xl font-bold">
-                  <span className="text-white">Итого:</span>
-                  <span className="text-emerald-400">{cartTotal.toLocaleString('ru-RU')} ₽</span>
-                </div>
-              </div>
-              <button 
-                onClick={handleInitCheckout}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-emerald-900/40 active:scale-[0.98]"
-              >
-                Оформить заказ
-                <ChevronRight size={20} />
-              </button>
-              <p className="text-xs text-center text-gray-600 mt-4">
-                Нажимаю кнопку, вы соглашаетесь с условиями обработки данных
-              </p>
-            </div>
-          )}
         </div>
-      </div>
-
-      {/* Order Form Modal */}
-      {showOrderForm && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm animate-in fade-in duration-300"></div>
-          <div className="relative bg-neutral-900 border border-neutral-800 p-8 rounded-2xl max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300">
-            <button 
-              onClick={() => setShowOrderForm(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-            
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-white mb-2">Оформление заказа</h3>
-              <p className="text-gray-400 text-sm">Введите данные для связи, чтобы мы могли подтвердить заказ.</p>
-            </div>
-
-            <form onSubmit={handleFinalizeOrder} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Телефон</label>
-                <div className="relative group focus-within:text-emerald-500 text-gray-500">
-                  <Phone size={18} className="absolute left-3 top-3.5 transition-colors" />
-                  <input 
-                    type="tel"
-                    name="phone"
-                    required
-                    placeholder="+7 (999) 000-00-00"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Telegram Username</label>
-                <div className="relative group focus-within:text-emerald-500 text-gray-500">
-                  <Send size={18} className="absolute left-3 top-3.5 transition-colors" />
-                  <input 
-                    type="text"
-                    name="telegram"
-                    required
-                    placeholder="@username"
-                    value={formData.telegram}
-                    onChange={handleInputChange}
-                    className="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <button 
-                  type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-emerald-900/40 active:scale-[0.98]"
-                >
-                  Подтвердить заказ
-                  <CheckCircle size={20} />
-                </button>
-                <p className="text-center text-xs text-gray-600 mt-3">
-                  Сумма к оплате: <span className="text-emerald-500 font-bold">{cartTotal.toLocaleString('ru-RU')} ₽</span>
-                </p>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm animate-in fade-in duration-300"></div>
-          <div className="relative bg-neutral-900 border border-neutral-800 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="mx-auto bg-emerald-500/10 w-20 h-20 rounded-full flex items-center justify-center mb-6 text-emerald-500 ring-4 ring-emerald-500/10">
-              <CheckCircle size={40} />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-3">Заказ принят!</h3>
-            <p className="text-gray-400 mb-8 leading-relaxed">
-              Мы уже собираем вашу экипировку. Менеджер свяжется с вами в Telegram в течение 15 минут.
-            </p>
-            <button 
-              onClick={() => setShowSuccessModal(false)}
-              className="w-full bg-neutral-800 hover:bg-neutral-700 text-white py-3 rounded-xl font-medium transition-colors border border-neutral-700"
-            >
-              Вернуться в магазин
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Footer */}
-      <footer className="bg-neutral-950 border-t border-neutral-900 pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div className="col-span-1 md:col-span-1">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="bg-emerald-900/50 p-2 rounded-lg text-emerald-500 border border-emerald-500/20">
-                  <Crosshair size={24} />
-                </div>
-                <span className="text-xl font-black text-white tracking-widest">TACTICAL<span className="text-emerald-600">ZONE</span></span>
-              </div>
-              <p className="text-gray-500 text-sm leading-relaxed mb-6">
-                Профессиональный магазин страйкбольного оборудования. 
-                Мы поставляем только то, чем пользуемся сами.
-              </p>
-              <div className="flex gap-3">
-                <a href="#" className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center text-gray-400 hover:bg-emerald-600 hover:text-white transition-all">
-                  VK
-                </a>
-                <a href="https://t.me/lkx_kxl" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center text-gray-400 hover:bg-sky-500 hover:text-white transition-all">
-                  <Send size={18} />
-                </a>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-bold mb-6 text-lg">Каталог</h4>
-              <ul className="space-y-3 text-gray-500 text-sm">
-                <li className="hover:text-emerald-500 cursor-pointer transition-colors">Штурмовые винтовки</li>
-                <li className="hover:text-emerald-500 cursor-pointer transition-colors">Снайперские винтовки</li>
-                <li className="hover:text-emerald-500 cursor-pointer transition-colors">Пистолеты GBB</li>
-                <li className="hover:text-emerald-500 cursor-pointer transition-colors">Тактическое снаряжение</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-bold mb-6 text-lg">Информация</h4>
-              <ul className="space-y-3 text-gray-500 text-sm">
-                <li className="hover:text-emerald-500 cursor-pointer transition-colors">О компании</li>
-                <li className="hover:text-emerald-500 cursor-pointer transition-colors">Условия доставки</li>
-                <li className="hover:text-emerald-500 cursor-pointer transition-colors">Гарантия и возврат</li>
-                <li className="hover:text-emerald-500 cursor-pointer transition-colors">Политика конфиденциальности</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-bold mb-6 text-lg">Контакты</h4>
-              <ul className="space-y-4 text-gray-500 text-sm">
-                <li className="flex items-start gap-3">
-                  <span className="text-emerald-600 font-bold">TG:</span>
-                  <a href="https://t.me/lkx_kxl" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">@lkx_kxl</a>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-emerald-600 font-bold">Tel:</span>
-                  <span>+7 (999) 000-00-00</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-emerald-600 font-bold">Loc:</span>
-                  <span>Москва, Территория 3000</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-neutral-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-neutral-600">
-            <p>© 2024 TacticalZone. Все права защищены.</p>
-            <p>Не является оружием. Вся продукция сертифицирована как конструктивно сходное с оружием изделие до 3Дж.</p>
-          </div>
-        </div>
-      </footer>
     </div>
-  );
-}
+
+    <!-- Cart Sidebar -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 pointer-events-none transition-all duration-300">
+        <!-- Backdrop -->
+        <div id="cart-backdrop" onclick="toggleCart(false)" class="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+        
+        <!-- Drawer -->
+        <div id="cart-panel" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-neutral-900 border-l border-neutral-800 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col pointer-events-auto">
+            
+            <div class="flex items-center justify-between p-6 border-b border-neutral-800">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Корзина</h2>
+                    <p id="cart-header-count" class="text-sm text-gray-500">0 позиций</p>
+                </div>
+                <button onclick="toggleCart(false)" class="p-2 bg-neutral-800 rounded-full text-gray-400 hover:text-white hover:bg-neutral-700 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- Cart items or empty state -->
+            </div>
+
+            <div id="cart-footer" class="p-6 border-t border-neutral-800 bg-neutral-900/50 backdrop-blur hidden">
+                <div class="space-y-2 mb-6">
+                    <div class="flex justify-between items-center pt-2 text-xl font-bold">
+                        <span class="text-white">Итого:</span>
+                        <span id="cart-total" class="text-emerald-400">0 ₽</span>
+                    </div>
+                </div>
+                <button onclick="openOrderModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-emerald-900/40 active:scale-[0.98]">
+                    Оформить заказ
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="order-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm fade-in"></div>
+        <div class="relative bg-neutral-900 border border-neutral-800 p-8 rounded-2xl max-w-md w-full shadow-2xl zoom-in">
+            <button onclick="closeModals()" class="absolute top-4 right-4 text-gray-500 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold text-white mb-2">Оформление заказа</h3>
+                <p class="text-gray-400 text-sm">Введите данные для связи, чтобы мы могли подтвердить заказ.</p>
+            </div>
+
+            <form onsubmit="submitOrder(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Телефон</label>
+                    <div class="relative group focus-within:text-emerald-500 text-gray-500">
+                        <i data-lucide="phone" class="absolute left-3 top-3.5 w-4 h-4 transition-colors"></i>
+                        <input type="tel" required placeholder="+7 (999) 000-00-00"
+                               class="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Telegram Username</label>
+                    <div class="relative group focus-within:text-emerald-500 text-gray-500">
+                        <i data-lucide="send" class="absolute left-3 top-3.5 w-4 h-4 transition-colors"></i>
+                        <input type="text" required placeholder="@username"
+                               class="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-emerald-900/40 active:scale-[0.98]">
+                        Подтвердить заказ
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    </button>
+                    <p class="text-center text-xs text-gray-600 mt-3">
+                        Сумма к оплате: <span id="modal-total" class="text-emerald-500 font-bold">0 ₽</span>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm fade-in"></div>
+        <div class="relative bg-neutral-900 border border-neutral-800 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl zoom-in">
+            <div class="mx-auto bg-emerald-500/10 w-20 h-20 rounded-full flex items-center justify-center mb-6 text-emerald-500 ring-4 ring-emerald-500/10">
+                <i data-lucide="check-circle" class="w-10 h-10"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-3">Заказ принят!</h3>
+            <p class="text-gray-400 mb-8 leading-relaxed">
+                Мы уже собираем вашу экипировку. Менеджер свяжется с вами в Telegram в течение 15 минут.
+            </p>
+            <button onclick="closeModals()" class="w-full bg-neutral-800 hover:bg-neutral-700 text-white py-3 rounded-xl font-medium transition-colors border border-neutral-700">
+                Вернуться в магазин
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-neutral-950 border-t border-neutral-900 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="bg-emerald-900/50 p-2 rounded-lg text-emerald-500 border border-emerald-500/20">
+                            <i data-lucide="crosshair" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xl font-black text-white tracking-widest">TACTICAL<span class="text-emerald-600">ZONE</span></span>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                        Профессиональный магазин страйкбольного оборудования. 
+                        Мы поставляем только то, чем пользуемся сами.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-6 text-lg">Контакты</h4>
+                    <ul class="space-y-4 text-gray-500 text-sm">
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-600 font-bold">TG:</span>
+                            <a href="https://t.me/lkx_kxl" target="_blank" rel="noreferrer" class="hover:text-white transition-colors">@lkx_kxl</a>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-600 font-bold">Tel:</span>
+                            <span>+7 (999) 000-00-00</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-neutral-900 pt-8 text-center text-xs text-neutral-600">
+                <p>© 2024 TacticalZone. Все права защищены. Не является оружием.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA ---
+        const PRODUCTS = [
+            { id: 1, name: "AK-74M E&L Gen.2", price: 28500, oldPrice: 32000, category: "rifles", image: "https://placehold.co/600x400/2f3e30/ffffff?text=AK-74M", specs: { speed: "130 м/с", type: "AEG", material: "Сталь/Пластик" }, rating: 5, reviews: 12, tag: "Хит", description: "Легендарная надежность. Стальной корпус." },
+            { id: 2, name: "M4A1 SOPMOD Cyma", price: 18900, category: "rifles", image: "https://placehold.co/600x400/1a202c/ffffff?text=M4A1", specs: { speed: "120 м/с", type: "AEG", material: "Алюминий" }, rating: 4, reviews: 8, description: "Модульная платформа AR-15." },
+            { id: 3, name: "Glock 17 Gen.4 WE", price: 9500, category: "pistols", image: "https://placehold.co/600x400/333333/ffffff?text=Glock+17", specs: { speed: "95 м/с", type: "GBB", material: "Металл" }, rating: 5, reviews: 24, tag: "Топ", description: "Мощная отдача (Blowback)." },
+            { id: 4, name: "VSR-10 Sniper", price: 14200, category: "snipers", image: "https://placehold.co/600x400/4a5568/ffffff?text=VSR-10", specs: { speed: "150 м/с", type: "Spring", material: "Пластик" }, rating: 4, reviews: 5, description: "Болтовка для начинающих." },
+            { id: 5, name: "Плитник 6094", price: 5500, category: "gear", image: "https://placehold.co/600x400/553c2a/ffffff?text=Plate+Carrier", specs: { color: "Multicam", type: "Plate Carrier" }, rating: 5, reviews: 18, description: "Система MOLLE." },
+            { id: 6, name: "Colt 1911 KJW CO2", price: 11000, category: "pistols", image: "https://placehold.co/600x400/2d3748/ffffff?text=Colt+1911", specs: { speed: "105 м/с", type: "CO2", material: "Full Metal" }, rating: 4, reviews: 9, tag: "Мощь", description: "Тяжелый, мощный пистолет." },
+            { id: 7, name: "HK416 East Crane", price: 24000, oldPrice: 26500, category: "rifles", image: "https://placehold.co/600x400/171717/ffffff?text=HK416", specs: { speed: "125 м/с", type: "AEG", material: "Алюминий" }, rating: 5, reviews: 15, tag: "New", description: "Выбор спецназа." },
+            { id: 8, name: "Очки Pyramex I-Force", price: 2100, category: "gear", image: "https://placehold.co/600x400/718096/ffffff?text=Pyramex", specs: { rating: "ANSI Z87.1", type: "Баллистические" }, rating: 5, reviews: 42, description: "Не запотевают." }
+        ];
+
+        const CATEGORIES = [
+            { id: 'all', name: 'Все товары' },
+            { id: 'rifles', name: 'Приводы (AEG)' },
+            { id: 'pistols', name: 'Пистолеты' },
+            { id: 'snipers', name: 'Снайпинг' },
+            { id: 'gear', name: 'Снаряжение' },
+        ];
+
+        // --- STATE ---
+        let activeCategory = 'all';
+        let searchQuery = '';
+        let cart = [];
+
+        // --- DOM ELEMENTS ---
+        const els = {
+            desktopMenu: document.getElementById('desktop-menu'),
+            mobileMenu: document.getElementById('mobile-menu'),
+            mobileMenuItems: document.getElementById('mobile-menu-items'),
+            productsGrid: document.getElementById('products-grid'),
+            categoryTitle: document.getElementById('category-title'),
+            productsCount: document.getElementById('products-count'),
+            emptyState: document.getElementById('empty-state'),
+            searchInput: document.getElementById('search-input'),
+            mobileSearchInput: document.getElementById('mobile-search-input'),
+            cartDrawer: document.getElementById('cart-drawer'),
+            cartBackdrop: document.getElementById('cart-backdrop'),
+            cartPanel: document.getElementById('cart-panel'),
+            cartItems: document.getElementById('cart-items'),
+            cartFooter: document.getElementById('cart-footer'),
+            cartTotal: document.getElementById('cart-total'),
+            cartHeaderCount: document.getElementById('cart-header-count'),
+            cartBadge: document.getElementById('cart-badge'),
+            orderModal: document.getElementById('order-modal'),
+            successModal: document.getElementById('success-modal'),
+            modalTotal: document.getElementById('modal-total')
+        };
+
+        // --- FUNCTIONS ---
+
+        function init() {
+            renderCategories();
+            renderProducts();
+            
+            // Search Listeners
+            els.searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
+            els.mobileSearchInput.addEventListener('input', (e) => handleSearch(e.target.value));
+
+            lucide.createIcons();
+        }
+
+        function handleSearch(val) {
+            searchQuery = val.toLowerCase();
+            renderProducts();
+        }
+
+        function setCategory(id) {
+            activeCategory = id;
+            toggleMobileMenu(false); // Close mobile menu if open
+            renderCategories();
+            renderProducts();
+        }
+
+        function renderCategories() {
+            // Desktop
+            els.desktopMenu.innerHTML = CATEGORIES.map(cat => `
+                <button onclick="setCategory('${cat.id}')"
+                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat.id ? 'bg-neutral-700 text-emerald-400 shadow-sm' : 'text-gray-400 hover:text-white hover:bg-neutral-800'}">
+                    ${cat.name}
+                </button>
+            `).join('');
+
+            // Mobile
+            els.mobileMenuItems.innerHTML = CATEGORIES.map(cat => `
+                <button onclick="setCategory('${cat.id}')"
+                    class="block w-full text-left px-4 py-3 rounded-xl text-base font-bold transition-colors ${activeCategory === cat.id ? 'bg-neutral-800 text-emerald-500 border border-neutral-700' : 'text-gray-400 hover:bg-neutral-800/50 hover:text-white'}">
+                    ${cat.name}
+                </button>
+            `).join('');
+        }
+
+        function renderProducts() {
+            const filtered = PRODUCTS.filter(p => {
+                const matchCat = activeCategory === 'all' || p.category === activeCategory;
+                const matchSearch = p.name.toLowerCase().includes(searchQuery);
+                return matchCat && matchSearch;
+            });
+
+            els.categoryTitle.innerText = CATEGORIES.find(c => c.id === activeCategory)?.name || 'Каталог';
+            els.productsCount.innerText = `Найдено ${filtered.length} позиций`;
+
+            if (filtered.length === 0) {
+                els.productsGrid.classList.add('hidden');
+                els.emptyState.classList.remove('hidden');
+                els.emptyState.classList.add('flex');
+            } else {
+                els.productsGrid.classList.remove('hidden');
+                els.emptyState.classList.add('hidden');
+                els.emptyState.classList.remove('flex');
+            }
+
+            els.productsGrid.innerHTML = filtered.map(product => {
+                const stars = Array(5).fill(0).map((_, i) => 
+                    `<i data-lucide="star" class="w-3.5 h-3.5 ${i < product.rating ? 'text-yellow-500 fill-current' : 'text-neutral-600'}"></i>`
+                ).join('');
+
+                const specs = Object.entries(product.specs).slice(0, 2).map(([k, v]) => `
+                    <div class="bg-neutral-800/50 rounded px-2 py-1.5 border border-neutral-800">
+                        <p class="text-[10px] text-gray-500 uppercase tracking-wider">${k}</p>
+                        <p class="text-xs font-medium text-gray-200 truncate">${v}</p>
+                    </div>
+                `).join('');
+
+                return `
+                <div class="group bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-900/10 flex flex-col relative">
+                    ${product.tag ? `<div class="absolute top-3 left-3 z-10 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg">${product.tag}</div>` : ''}
+                    
+                    <div class="relative aspect-[5/4] overflow-hidden bg-neutral-800">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" onerror="this.src='https://placehold.co/600x400/171717/333333?text=No+Image'">
+                        <div class="absolute top-3 right-3 bg-neutral-900/80 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-gray-300 border border-neutral-700/50 uppercase tracking-wide">
+                            ${product.specs.type || 'Gear'}
+                        </div>
+                    </div>
+                    
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="flex text-yellow-500 gap-0.5">${stars}</div>
+                                <span class="text-xs text-gray-500">(${product.reviews})</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2 leading-tight group-hover:text-emerald-400 transition-colors">${product.name}</h3>
+                            <p class="text-gray-400 text-sm mb-4 line-clamp-2 leading-relaxed">${product.description}</p>
+                            <div class="grid grid-cols-2 gap-2 mb-4">${specs}</div>
+                        </div>
+
+                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-neutral-800">
+                            <div>
+                                ${product.oldPrice ? `<span class="text-xs text-gray-500 line-through block mb-0.5">${product.oldPrice.toLocaleString()} ₽</span>` : ''}
+                                <span class="text-xl font-bold text-emerald-400">${product.price.toLocaleString()} ₽</span>
+                            </div>
+                            <button onclick="addToCart(${product.id})" class="bg-neutral-800 hover:bg-emerald-600 text-white w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 group/btn">
+                                <i data-lucide="shopping-cart" class="w-5 h-5 text-emerald-500 group-hover/btn:text-white transition-colors"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // --- CART LOGIC ---
+        function toggleCart(show) {
+            if (show) {
+                els.cartDrawer.classList.remove('pointer-events-none');
+                els.cartBackdrop.classList.remove('opacity-0');
+                els.cartPanel.classList.remove('translate-x-full');
+            } else {
+                els.cartDrawer.classList.add('pointer-events-none');
+                els.cartBackdrop.classList.add('opacity-0');
+                els.cartPanel.classList.add('translate-x-full');
+            }
+        }
+
+        function addToCart(id) {
+            const product = PRODUCTS.find(p => p.id === id);
+            const existing = cart.find(item => item.id === id);
+            
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            renderCart();
+            toggleCart(true);
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            renderCart();
+        }
+
+        function updateQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty = Math.max(1, item.qty + delta);
+                renderCart();
+            }
+        }
+
+        function renderCart() {
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const count = cart.reduce((sum, item) => sum + item.qty, 0);
+
+            // Update Badge
+            if (count > 0) {
+                els.cartBadge.classList.remove('hidden');
+                els.cartBadge.classList.add('inline-flex');
+                els.cartBadge.innerText = count;
+            } else {
+                els.cartBadge.classList.add('hidden');
+                els.cartBadge.classList.remove('inline-flex');
+            }
+
+            els.cartHeaderCount.innerText = `${count} позиций`;
+            els.cartTotal.innerText = `${total.toLocaleString()} ₽`;
+            els.modalTotal.innerText = `${total.toLocaleString()} ₽`;
+
+            if (cart.length === 0) {
+                els.cartFooter.classList.add('hidden');
+                els.cartItems.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-gray-500 space-y-4 pt-20">
+                        <div class="p-6 bg-neutral-800 rounded-full opacity-50">
+                            <i data-lucide="shopping-cart" class="w-10 h-10"></i>
+                        </div>
+                        <p class="text-lg font-medium">Корзина пуста</p>
+                        <button onclick="toggleCart(false)" class="text-emerald-500 hover:text-emerald-400 font-bold">Перейти в каталог</button>
+                    </div>`;
+            } else {
+                els.cartFooter.classList.remove('hidden');
+                els.cartItems.innerHTML = cart.map(item => `
+                    <div class="flex gap-4 bg-neutral-800/40 p-3 rounded-xl border border-neutral-800 group hover:border-neutral-700 transition-colors">
+                        <div class="w-20 h-20 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-white text-sm line-clamp-2 leading-snug">${item.name}</h4>
+                                <p class="text-emerald-400 font-bold mt-1">${item.price.toLocaleString()} ₽</p>
+                            </div>
+                            <div class="flex items-center justify-between mt-2">
+                                <div class="flex items-center gap-3 bg-neutral-900 rounded-lg p-1 border border-neutral-800">
+                                    <button onclick="updateQty(${item.id}, -1)" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white rounded hover:bg-neutral-800">-</button>
+                                    <span class="text-sm font-bold min-w-[1.5rem] text-center">${item.qty}</span>
+                                    <button onclick="updateQty(${item.id}, 1)" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white rounded hover:bg-neutral-800">+</button>
+                                </div>
+                                <button onclick="removeFromCart(${item.id})" class="text-red-500/50 hover:text-red-500 p-1.5 rounded hover:bg-red-500/10 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
+        // --- MOBILE MENU ---
+        function toggleMobileMenu(forceState) {
+            const isHidden = els.mobileMenu.classList.contains('hidden');
+            const shouldShow = forceState !== undefined ? forceState : isHidden;
+            
+            if (shouldShow) {
+                els.mobileMenu.classList.remove('hidden');
+            } else {
+                els.mobileMenu.classList.add('hidden');
+            }
+        }
+
+        function scrollToCatalog() {
+            document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- MODALS ---
+        function openOrderModal() {
+            toggleCart(false);
+            els.orderModal.classList.remove('hidden');
+        }
+
+        function closeModals() {
+            els.orderModal.classList.add('hidden');
+            els.successModal.classList.add('hidden');
+        }
+
+        function submitOrder(e) {
+            e.preventDefault();
+            els.orderModal.classList.add('hidden');
+            els.successModal.classList.remove('hidden');
+            
+            // Clear cart
+            cart = [];
+            renderCart();
+            
+            // Auto close success modal
+            setTimeout(() => {
+                closeModals();
+            }, 5000);
+        }
+
+        // Start App
+        init();
+    </script>
+</body>
+</html>
