@@ -2,655 +2,232 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TacticalZone | Страйкбольный магазин</title>
-    
-    <!-- Подключаем Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TacticalShop Bot</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Подключаем Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Настройка шрифтов (Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        
-        /* Скроллбар для Webkit */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #171717; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
-
-        /* Анимации для модальных окон и переходов */
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        .slide-in-right { animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .slide-out-right { animation: slideOutRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .zoom-in { animation: zoomIn 0.3s ease-out forwards; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        @keyframes slideOutRight { from { transform: translateX(0); } to { transform: translateX(100%); } }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-    </style>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        neutral: { 850: '#1f1f1f', 950: '#0a0a0a' }
-                    }
-                }
-            }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1a202c; /* gray-900 */
+            color: #ffffff;
+            -webkit-tap-highlight-color: transparent;
         }
-    </script>
+        /* Стилизация скроллбара */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 2px;
+        }
+        .message-bubble {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-press:active {
+            transform: scale(0.98);
+            background-color: rgba(0,0,0,0.2);
+        }
+    </style>
 </head>
-<body class="bg-neutral-950 text-gray-100 selection:bg-emerald-600 selection:text-white overflow-x-hidden">
+<body class="h-screen w-full flex flex-col overflow-hidden bg-gray-900 text-gray-100">
 
-    <!-- Floating Telegram Button -->
-    <a href="https://t.me/lkx_kxl" target="_blank" rel="noopener noreferrer"
-       class="fixed bottom-6 right-6 z-40 bg-sky-500 hover:bg-sky-600 text-white p-4 rounded-full shadow-lg shadow-sky-500/30 transition-all hover:scale-110 flex items-center gap-2 group">
-        <i data-lucide="send" class="w-6 h-6 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform"></i>
-        <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap font-bold text-sm">
-          Написать в TG
-        </span>
-    </a>
+    <!-- Header -->
+    <header class="flex-none h-14 bg-gray-800 border-b border-gray-700 flex items-center px-4 shadow-md z-10">
+        <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center mr-3 font-bold text-lg">TS</div>
+        <div>
+            <h1 class="font-bold text-lg leading-tight">TacticalShop</h1>
+            <p class="text-xs text-blue-400">bot</p>
+        </div>
+    </header>
 
-    <!-- Navbar -->
-    <nav class="sticky top-0 z-40 bg-neutral-900/90 backdrop-blur-md border-b border-neutral-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                
-                <!-- Logo -->
-                <div class="flex items-center gap-3 cursor-pointer group" onclick="setCategory('all')">
-                    <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 p-2 rounded-lg text-white shadow-lg shadow-emerald-900/50 group-hover:shadow-emerald-500/20 transition-all">
-                        <i data-lucide="crosshair" class="w-7 h-7"></i>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-xl font-black tracking-widest text-white leading-none">TACTICAL</span>
-                        <span class="text-sm font-bold text-emerald-500 tracking-[0.2em] leading-none">ZONE</span>
-                    </div>
-                </div>
-
-                <!-- Desktop Menu -->
-                <div class="hidden lg:flex items-center space-x-1 bg-neutral-800/50 p-1.5 rounded-full border border-neutral-700/50" id="desktop-menu">
-                    <!-- Categories injected by JS -->
-                </div>
-
-                <!-- Icons & Mobile Toggle -->
-                <div class="flex items-center gap-4">
-                    <div class="relative hidden md:block group">
-                        <input type="text" id="search-input" placeholder="Поиск экипировки..." 
-                               class="bg-neutral-800 border border-neutral-700 rounded-full py-2 px-4 pl-10 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 w-48 transition-all focus:w-64 group-hover:border-neutral-600">
-                        <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-500 w-4 h-4 group-hover:text-gray-300 transition-colors"></i>
-                    </div>
-
-                    <button onclick="toggleCart(true)" class="relative p-2.5 bg-neutral-800 rounded-full text-gray-400 hover:text-white hover:bg-neutral-700 transition-all border border-transparent hover:border-neutral-600">
-                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                        <span id="cart-badge" class="hidden absolute -top-1 -right-1 items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-emerald-600 rounded-full border-2 border-neutral-900">0</span>
-                    </button>
-
-                    <button class="lg:hidden p-2 text-gray-400 hover:text-white" onclick="toggleMobileMenu()">
-                        <i data-lucide="menu" class="w-6 h-6"></i>
-                    </button>
-                </div>
+    <!-- Chat Area -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+        <!-- Стартовое сообщение -->
+        <div class="message-bubble flex flex-col items-start">
+            <div class="bg-gray-800 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl max-w-[85%] shadow-sm">
+                <p class="text-sm">Салют! Ты в <b>TacticalSHOP</b>.<br><br>
+                🔥 Большой выбор огнестрельного оружия.<br>
+                📦 Анонимная доставка по СНГ.<br><br>
+                🎯 Девиз — Точность и трудолюбие.</p>
             </div>
+            <span class="text-xs text-gray-500 mt-1 ml-1">Bot</span>
         </div>
+    </main>
 
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden lg:hidden bg-neutral-900 border-b border-neutral-700">
-            <div class="px-4 pt-2 pb-6 space-y-2">
-                <input type="text" id="mobile-search-input" placeholder="Поиск..." 
-                       class="w-full bg-neutral-800 border border-neutral-700 rounded-lg py-2 px-4 mb-4 text-sm focus:outline-none focus:border-emerald-500 text-white">
-                <div id="mobile-menu-items">
-                    <!-- Mobile items injected by JS -->
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <div class="relative bg-neutral-900 overflow-hidden min-h-[500px] flex items-center">
-        <div class="absolute inset-0 bg-[url('https://placehold.co/1920x800/0f1110/333333?text=Tactical+Warfare')] bg-cover bg-center opacity-40"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/80 to-transparent"></div>
-        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-neutral-950 to-transparent"></div>
-
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
-            <div class="max-w-2xl">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-6">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Новое поступление 2024
-                </div>
-                <h1 class="text-5xl sm:text-6xl md:text-7xl font-black text-white leading-[1.1] mb-6">
-                    ТВОЕ <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">ПРЕВОСХОДСТВО</span><br/>
-                    НА ПОЛЕ БОЯ
-                </h1>
-                <p class="text-lg sm:text-xl text-gray-400 mb-8 max-w-lg leading-relaxed">
-                    Экипировка профессионального уровня. Приводы, прошедшие проверку боем. 
-                    Гарантия качества и поддержка 24/7.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <button onclick="scrollToCatalog()" class="group flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white text-lg font-bold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:-translate-y-1">
-                        Открыть каталог
-                        <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
-                    </button>
-                    <a href="https://t.me/lkx_kxl" target="_blank" class="flex items-center justify-center gap-2 px-8 py-4 bg-neutral-800 hover:bg-neutral-700 text-white text-lg font-bold rounded-xl border border-neutral-700 hover:border-neutral-600 transition-all hover:-translate-y-1">
-                        <i data-lucide="send" class="w-4 h-4 text-sky-400"></i>
-                        Написать менеджеру
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Features -->
-    <div class="py-16 bg-neutral-950 border-y border-neutral-900">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="flex items-start gap-4 p-6 rounded-2xl bg-neutral-900/50 border border-neutral-800 hover:border-emerald-500/30 transition-colors group">
-                    <div class="p-3 bg-neutral-800 rounded-xl text-emerald-500 group-hover:bg-emerald-500/10 group-hover:scale-110 transition-all">
-                        <i data-lucide="shield" class="w-7 h-7"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white mb-1">Гарантия 1 год</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">Бесплатный ремонт и обслуживание</p>
-                    </div>
-                </div>
-                <!-- Feature 2 -->
-                <div class="flex items-start gap-4 p-6 rounded-2xl bg-neutral-900/50 border border-neutral-800 hover:border-emerald-500/30 transition-colors group">
-                    <div class="p-3 bg-neutral-800 rounded-xl text-emerald-500 group-hover:bg-emerald-500/10 group-hover:scale-110 transition-all">
-                        <i data-lucide="zap" class="w-7 h-7"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white mb-1">Быстрая доставка</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">Отправка СДЭК в день заказа</p>
-                    </div>
-                </div>
-                <!-- Feature 3 -->
-                <div class="flex items-start gap-4 p-6 rounded-2xl bg-neutral-900/50 border border-neutral-800 hover:border-emerald-500/30 transition-colors group">
-                    <div class="p-3 bg-neutral-800 rounded-xl text-emerald-500 group-hover:bg-emerald-500/10 group-hover:scale-110 transition-all">
-                        <i data-lucide="check-circle" class="w-7 h-7"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white mb-1">Проверено</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">Контроль качества (хронометрирование)</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Catalog Section -->
-    <div id="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-            <div>
-                <h2 id="category-title" class="text-3xl md:text-4xl font-bold text-white mb-2">Каталог</h2>
-                <p id="products-count" class="text-gray-500">Найдено 0 позиций</p>
-            </div>
-        </div>
-
-        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- Products will be injected here -->
-        </div>
-        
-        <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-gray-500 bg-neutral-900/30 rounded-3xl border border-neutral-800 border-dashed">
-            <i data-lucide="search" class="w-12 h-12 mb-4 opacity-20"></i>
-            <p class="text-xl font-medium">По вашему запросу ничего не найдено.</p>
-            <button onclick="setCategory('all'); document.getElementById('search-input').value = ''" class="mt-4 text-emerald-500 hover:text-emerald-400 font-bold underline decoration-2 underline-offset-4">
-              Показать все товары
+    <!-- Bottom Menu (Reply Keyboard) -->
+    <div class="flex-none bg-gray-800 border-t border-gray-700 p-2 pb-6 safe-area-pb">
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="showCategories()" class="btn-press bg-gray-700 hover:bg-gray-600 p-3 rounded-lg text-sm font-medium transition-colors">
+                🔫 Каталог
+            </button>
+            <button onclick="showInfo()" class="btn-press bg-gray-700 hover:bg-gray-600 p-3 rounded-lg text-sm font-medium transition-colors">
+                ℹ️ Инфо
+            </button>
+            <button onclick="window.open('https://balansandre2-hue.github.io/dsdaa/', '_blank')" class="btn-press bg-gray-700 hover:bg-gray-600 p-3 rounded-lg text-sm font-medium transition-colors">
+                🌐 Наш сайт
+            </button>
+            <button onclick="window.open('https://t.me/+l4Mt8VCqCf42ZDU5', '_blank')" class="btn-press bg-gray-700 hover:bg-gray-600 p-3 rounded-lg text-sm font-medium transition-colors">
+                💬 Отзывы
             </button>
         </div>
     </div>
 
-    <!-- Cart Sidebar -->
-    <div id="cart-drawer" class="fixed inset-0 z-50 pointer-events-none transition-all duration-300">
-        <!-- Backdrop -->
-        <div id="cart-backdrop" onclick="toggleCart(false)" class="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
-        
-        <!-- Drawer -->
-        <div id="cart-panel" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-neutral-900 border-l border-neutral-800 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col pointer-events-auto">
-            
-            <div class="flex items-center justify-between p-6 border-b border-neutral-800">
-                <div>
-                    <h2 class="text-xl font-bold text-white">Корзина</h2>
-                    <p id="cart-header-count" class="text-sm text-gray-500">0 позиций</p>
-                </div>
-                <button onclick="toggleCart(false)" class="p-2 bg-neutral-800 rounded-full text-gray-400 hover:text-white hover:bg-neutral-700 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
-                <!-- Cart items or empty state -->
-            </div>
-
-            <div id="cart-footer" class="p-6 border-t border-neutral-800 bg-neutral-900/50 backdrop-blur hidden">
-                <div class="space-y-2 mb-6">
-                    <div class="flex justify-between items-center pt-2 text-xl font-bold">
-                        <span class="text-white">Итого:</span>
-                        <span id="cart-total" class="text-emerald-400">0 ₽</span>
-                    </div>
-                </div>
-                <button onclick="openOrderModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-emerald-900/40 active:scale-[0.98]">
-                    Оформить заказ
-                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Order Modal -->
-    <div id="order-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center px-4">
-        <div class="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm fade-in"></div>
-        <div class="relative bg-neutral-900 border border-neutral-800 p-8 rounded-2xl max-w-md w-full shadow-2xl zoom-in">
-            <button onclick="closeModals()" class="absolute top-4 right-4 text-gray-500 hover:text-white">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            
-            <div class="mb-6">
-                <h3 class="text-2xl font-bold text-white mb-2">Оформление заказа</h3>
-                <p class="text-gray-400 text-sm">Введите данные для связи, чтобы мы могли подтвердить заказ.</p>
-            </div>
-
-            <form onsubmit="submitOrder(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Телефон</label>
-                    <div class="relative group focus-within:text-emerald-500 text-gray-500">
-                        <i data-lucide="phone" class="absolute left-3 top-3.5 w-4 h-4 transition-colors"></i>
-                        <input type="tel" required placeholder="+7 (999) 000-00-00"
-                               class="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1.5 ml-1">Telegram Username</label>
-                    <div class="relative group focus-within:text-emerald-500 text-gray-500">
-                        <i data-lucide="send" class="absolute left-3 top-3.5 w-4 h-4 transition-colors"></i>
-                        <input type="text" required placeholder="@username"
-                               class="w-full bg-neutral-800 border border-neutral-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
-                    </div>
-                </div>
-
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-emerald-900/40 active:scale-[0.98]">
-                        Подтвердить заказ
-                        <i data-lucide="check-circle" class="w-5 h-5"></i>
-                    </button>
-                    <p class="text-center text-xs text-gray-600 mt-3">
-                        Сумма к оплате: <span id="modal-total" class="text-emerald-500 font-bold">0 ₽</span>
-                    </p>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Success Modal -->
-    <div id="success-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center px-4">
-        <div class="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm fade-in"></div>
-        <div class="relative bg-neutral-900 border border-neutral-800 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl zoom-in">
-            <div class="mx-auto bg-emerald-500/10 w-20 h-20 rounded-full flex items-center justify-center mb-6 text-emerald-500 ring-4 ring-emerald-500/10">
-                <i data-lucide="check-circle" class="w-10 h-10"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-3">Заказ принят!</h3>
-            <p class="text-gray-400 mb-8 leading-relaxed">
-                Мы уже собираем вашу экипировку. Менеджер свяжется с вами в Telegram в течение 15 минут.
-            </p>
-            <button onclick="closeModals()" class="w-full bg-neutral-800 hover:bg-neutral-700 text-white py-3 rounded-xl font-medium transition-colors border border-neutral-700">
-                Вернуться в магазин
-            </button>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-neutral-950 border-t border-neutral-900 pt-16 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                <div class="col-span-1 md:col-span-1">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="bg-emerald-900/50 p-2 rounded-lg text-emerald-500 border border-emerald-500/20">
-                            <i data-lucide="crosshair" class="w-6 h-6"></i>
-                        </div>
-                        <span class="text-xl font-black text-white tracking-widest">TACTICAL<span class="text-emerald-600">ZONE</span></span>
-                    </div>
-                    <p class="text-gray-500 text-sm leading-relaxed mb-6">
-                        Профессиональный магазин страйкбольного оборудования. 
-                        Мы поставляем только то, чем пользуемся сами.
-                    </p>
-                </div>
-                
-                <div>
-                    <h4 class="text-white font-bold mb-6 text-lg">Контакты</h4>
-                    <ul class="space-y-4 text-gray-500 text-sm">
-                        <li class="flex items-start gap-3">
-                            <span class="text-emerald-600 font-bold">TG:</span>
-                            <a href="https://t.me/lkx_kxl" target="_blank" rel="noreferrer" class="hover:text-white transition-colors">@lkx_kxl</a>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-emerald-600 font-bold">Tel:</span>
-                            <span>+7 (999) 000-00-00</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-neutral-900 pt-8 text-center text-xs text-neutral-600">
-                <p>© 2024 TacticalZone. Все права защищены. Не является оружием.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- DATA ---
-        const PRODUCTS = [
-            { id: 1, name: "AK-74M E&L Gen.2", price: 28500, oldPrice: 32000, category: "rifles", image: "https://placehold.co/600x400/2f3e30/ffffff?text=AK-74M", specs: { speed: "130 м/с", type: "AEG", material: "Сталь/Пластик" }, rating: 5, reviews: 12, tag: "Хит", description: "Легендарная надежность. Стальной корпус." },
-            { id: 2, name: "M4A1 SOPMOD Cyma", price: 18900, category: "rifles", image: "https://placehold.co/600x400/1a202c/ffffff?text=M4A1", specs: { speed: "120 м/с", type: "AEG", material: "Алюминий" }, rating: 4, reviews: 8, description: "Модульная платформа AR-15." },
-            { id: 3, name: "Glock 17 Gen.4 WE", price: 9500, category: "pistols", image: "https://placehold.co/600x400/333333/ffffff?text=Glock+17", specs: { speed: "95 м/с", type: "GBB", material: "Металл" }, rating: 5, reviews: 24, tag: "Топ", description: "Мощная отдача (Blowback)." },
-            { id: 4, name: "VSR-10 Sniper", price: 14200, category: "snipers", image: "https://placehold.co/600x400/4a5568/ffffff?text=VSR-10", specs: { speed: "150 м/с", type: "Spring", material: "Пластик" }, rating: 4, reviews: 5, description: "Болтовка для начинающих." },
-            { id: 5, name: "Плитник 6094", price: 5500, category: "gear", image: "https://placehold.co/600x400/553c2a/ffffff?text=Plate+Carrier", specs: { color: "Multicam", type: "Plate Carrier" }, rating: 5, reviews: 18, description: "Система MOLLE." },
-            { id: 6, name: "Colt 1911 KJW CO2", price: 11000, category: "pistols", image: "https://placehold.co/600x400/2d3748/ffffff?text=Colt+1911", specs: { speed: "105 м/с", type: "CO2", material: "Full Metal" }, rating: 4, reviews: 9, tag: "Мощь", description: "Тяжелый, мощный пистолет." },
-            { id: 7, name: "HK416 East Crane", price: 24000, oldPrice: 26500, category: "rifles", image: "https://placehold.co/600x400/171717/ffffff?text=HK416", specs: { speed: "125 м/с", type: "AEG", material: "Алюминий" }, rating: 5, reviews: 15, tag: "New", description: "Выбор спецназа." },
-            { id: 8, name: "Очки Pyramex I-Force", price: 2100, category: "gear", image: "https://placehold.co/600x400/718096/ffffff?text=Pyramex", specs: { rating: "ANSI Z87.1", type: "Баллистические" }, rating: 5, reviews: 42, description: "Не запотевают." }
-        ];
-
-        const CATEGORIES = [
-            { id: 'all', name: 'Все товары' },
-            { id: 'rifles', name: 'Приводы (AEG)' },
-            { id: 'pistols', name: 'Пистолеты' },
-            { id: 'snipers', name: 'Снайпинг' },
-            { id: 'gear', name: 'Снаряжение' },
-        ];
-
-        // --- STATE ---
-        let activeCategory = 'all';
-        let searchQuery = '';
-        let cart = [];
-
-        // --- DOM ELEMENTS ---
-        const els = {
-            desktopMenu: document.getElementById('desktop-menu'),
-            mobileMenu: document.getElementById('mobile-menu'),
-            mobileMenuItems: document.getElementById('mobile-menu-items'),
-            productsGrid: document.getElementById('products-grid'),
-            categoryTitle: document.getElementById('category-title'),
-            productsCount: document.getElementById('products-count'),
-            emptyState: document.getElementById('empty-state'),
-            searchInput: document.getElementById('search-input'),
-            mobileSearchInput: document.getElementById('mobile-search-input'),
-            cartDrawer: document.getElementById('cart-drawer'),
-            cartBackdrop: document.getElementById('cart-backdrop'),
-            cartPanel: document.getElementById('cart-panel'),
-            cartItems: document.getElementById('cart-items'),
-            cartFooter: document.getElementById('cart-footer'),
-            cartTotal: document.getElementById('cart-total'),
-            cartHeaderCount: document.getElementById('cart-header-count'),
-            cartBadge: document.getElementById('cart-badge'),
-            orderModal: document.getElementById('order-modal'),
-            successModal: document.getElementById('success-modal'),
-            modalTotal: document.getElementById('modal-total')
+        // База данных товаров
+        const PRODUCTS = {
+            combat: [
+                { id: "com_ak74m", name: "⚔️ AK-74M (ИжМаш)", price: 45000, image: "https://placehold.co/600x400/2f3e30/ffffff.png?text=AK-74M+Live", desc: "Оригинальный боевой автомат. Списанное боевое, не охолощенное. Полностью функциональный механизм.\n\n🛠 ТТХ: Калибр 5.45х39мм. Штатный образец ВС РФ." },
+                { id: "com_aks74u", name: "🌪 АКС-74У «Ксюха»", price: 52000, image: "https://placehold.co/600x400/3e2723/ffffff.png?text=AKS-74U", desc: "Укороченный автомат Калашникова. Идеальное состояние, оригинальные деревянные накладки.\n\n🛠 ТТХ: Калибр 5.45х39мм. Компактный и убойный." },
+                { id: "com_akm", name: "☭ АКМ (1960-е)", price: 48000, image: "https://placehold.co/600x400/4e342e/ffffff.png?text=AKM+7.62", desc: "Автомат Калашникова Модернизированный. Легендарный калибр 7.62. Пробивает кирпичную кладку.\n\n🛠 ТТХ: Калибр 7.62х39мм. Тяжелая пуля." },
+                { id: "com_svd", name: "🎯 СВД (Драгунов)", price: 85000, image: "https://placehold.co/600x400/1a1a1a/ffffff.png?text=SVD+Dragunov", desc: "Снайперская Винтовка Драгунова. В комплекте прицел ПСО-1.\n\n🛠 ТТХ: Калибр 7.62х54R. Прицельная дальность до 1300м." },
+                { id: "com_pm", name: "⭐ ПМ (Макаров)", price: 25000, image: "https://placehold.co/600x400/718096/ffffff.png?text=Makarov+PM", desc: "Боевой Пистолет Макарова. Производство СССР. Нарезной ствол, вороненая сталь.\n\n🛠 ТТХ: Калибр 9х18 ПМ. Надежность 100%." },
+                { id: "com_tt", name: "☭ ТТ-33 (Тульский)", price: 32000, image: "https://placehold.co/600x400/2d3748/ffffff.png?text=TT-33+Tokarev", desc: "Пистолет Токарева, военный выпуск. Отсутствуют штифты в стволе.\n\n🛠 ТТХ: Калибр 7.62х25 ТТ. Высокая пробивная способность." },
+                { id: "com_aps", name: "🔥 АПС (Стечкин)", price: 110000, image: "https://placehold.co/600x400/2b2b2b/ffffff.png?text=APS+Stechkin", desc: "Автоматический Пистолет Стечкина. Редкость. Режим автоматического огня сохранен.\n\n🛠 ТТХ: Калибр 9х18 ПМ. Магазин на 20 патронов." }
+            ],
+            traumatic: [
+                { id: "tr_osa", name: "🛡 Оса ПБ-4-2", price: 14500, image: "https://placehold.co/600x400/4a5568/ffffff.png?text=PB-4-2+Osa", desc: "Бесствольный пистолет самообороны. Мощнейший травмат.\n\n🛠 ТТХ: 18.5х55мм. Стальной сердечник пули." },
+                { id: "tr_pmt", name: "⭐ ПМ-Т (ЗиД)", price: 65000, image: "https://placehold.co/600x400/5a6772/ffffff.png?text=PM-T", desc: "Травматический пистолет на базе боевого ПМ. Минимум переделок.\n\n🛠 ТТХ: 9мм P.A. Лучший резинострел на рынке." },
+                { id: "tr_grand", name: "🔫 Grand Power T12", price: 42000, image: "https://placehold.co/600x400/171717/ffffff.png?text=Grand+Power+T12", desc: "Словацкий пистолет (сборка РФ). Эргономичный, мощный, современный.\n\n🛠 ТТХ: Калибр 10х28. Отличная кучность." },
+                { id: "tr_tt_t", name: "☭ ТТ-Т (Лидер)", price: 28000, image: "https://placehold.co/600x400/3c3c3c/ffffff.png?text=TT-Leader", desc: "Травматическая версия ТТ. Переделка из боевых образцов 40-х годов.\n\n🛠 ТТХ: 10х28. Историческая ценность." }
+            ],
+            other: [
+                { id: "acc_ammo_919", name: "📦 Патроны 9x19 (50 шт)", price: 3500, image: "https://placehold.co/600x400/b8860b/ffffff.png?text=9x19+Luger+Ammo", desc: "Стандартный пистолетный патрон. Оболочечная пуля (FMJ).\n\n🛠 Фасовка: Пачка 50 штук." },
+                { id: "acc_ammo_545", name: "📦 Цинк 5.45х39 (1080 шт)", price: 45000, image: "https://placehold.co/600x400/556b2f/ffffff.png?text=5.45+Crate", desc: "Армейский герметичный цинк. Патроны с пулей ПС (Стальной сердечник).\n\n🛠 Фасовка: Деревянный ящик / Цинк." },
+                { id: "acc_holster", name: "🕵️ Кобура Kydex", price: 4500, image: "https://placehold.co/600x400/000000/ffffff.png?text=Kydex+Holster", desc: "Кастомная кобура из кайдекса для скрытого внутрибрючного ношения (IWB).\n\n🛠 Материал: Kydex 2mm. Клипса: Сталь." },
+                { id: "acc_case", name: "🧳 Кейс оружейный", price: 12000, image: "https://placehold.co/600x400/2f4f4f/ffffff.png?text=Hard+Case", desc: "Ударопрочный, водонепроницаемый кейс. Поролоновый ложемент.\n\n🛠 Размер: 100х30х15 см. Защита IP67." },
+                { id: "acc_kit", name: "🧼 Набор для чистки", price: 3200, image: "https://placehold.co/600x400/8b4513/ffffff.png?text=Cleaning+Kit", desc: "Профессиональный набор для ухода за оружием.\n\n🛠 Состав: Полный комплект в пенале." }
+            ]
         };
 
-        // --- FUNCTIONS ---
+        const chatContainer = document.getElementById('chat-container');
 
-        // Global function to handle broken images
-        window.handleImageError = function(img) {
-            img.onerror = null; // Prevent infinite loop
-            img.src = "https://placehold.co/600x400/171717/333333?text=No+Image";
+        // Функция добавления сообщения пользователя
+        function addUserMessage(text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = "message-bubble flex flex-col items-end self-end w-full";
+            msgDiv.innerHTML = `
+                <div class="bg-blue-600 text-white p-3 rounded-tl-xl rounded-bl-xl rounded-br-xl max-w-[85%] shadow-sm">
+                    <p class="text-sm">${text}</p>
+                </div>
+            `;
+            chatContainer.appendChild(msgDiv);
+            scrollToBottom();
         }
 
-        function init() {
-            renderCategories();
-            renderProducts();
-            
-            // Search Listeners
-            els.searchInput.addEventListener('input', (e) => handleSearch(e.target.value));
-            els.mobileSearchInput.addEventListener('input', (e) => handleSearch(e.target.value));
-
-            lucide.createIcons();
+        // Функция добавления сообщения бота
+        function addBotMessage(content) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = "message-bubble flex flex-col items-start w-full";
+            msgDiv.innerHTML = `
+                <div class="bg-gray-800 p-3 rounded-tr-xl rounded-bl-xl rounded-br-xl max-w-[90%] md:max-w-[70%] shadow-sm w-full">
+                    ${content}
+                </div>
+                <span class="text-xs text-gray-500 mt-1 ml-1">Bot</span>
+            `;
+            chatContainer.appendChild(msgDiv);
+            scrollToBottom();
         }
 
-        function handleSearch(val) {
-            searchQuery = val.toLowerCase();
-            renderProducts();
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        function setCategory(id) {
-            activeCategory = id;
-            toggleMobileMenu(false); // Close mobile menu if open
-            renderCategories();
-            renderProducts();
-        }
-
-        function renderCategories() {
-            // Desktop
-            els.desktopMenu.innerHTML = CATEGORIES.map(cat => `
-                <button onclick="setCategory('${cat.id}')"
-                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat.id ? 'bg-neutral-700 text-emerald-400 shadow-sm' : 'text-gray-400 hover:text-white hover:bg-neutral-800'}">
-                    ${cat.name}
-                </button>
-            `).join('');
-
-            // Mobile
-            els.mobileMenuItems.innerHTML = CATEGORIES.map(cat => `
-                <button onclick="setCategory('${cat.id}')"
-                    class="block w-full text-left px-4 py-3 rounded-xl text-base font-bold transition-colors ${activeCategory === cat.id ? 'bg-neutral-800 text-emerald-500 border border-neutral-700' : 'text-gray-400 hover:bg-neutral-800/50 hover:text-white'}">
-                    ${cat.name}
-                </button>
-            `).join('');
-        }
-
-        function renderProducts() {
-            const filtered = PRODUCTS.filter(p => {
-                const matchCat = activeCategory === 'all' || p.category === activeCategory;
-                const matchSearch = p.name.toLowerCase().includes(searchQuery);
-                return matchCat && matchSearch;
-            });
-
-            els.categoryTitle.innerText = CATEGORIES.find(c => c.id === activeCategory)?.name || 'Каталог';
-            els.productsCount.innerText = `Найдено ${filtered.length} позиций`;
-
-            if (filtered.length === 0) {
-                els.productsGrid.classList.add('hidden');
-                els.emptyState.classList.remove('hidden');
-                els.emptyState.classList.add('flex');
-            } else {
-                els.productsGrid.classList.remove('hidden');
-                els.emptyState.classList.add('hidden');
-                els.emptyState.classList.remove('flex');
-            }
-
-            els.productsGrid.innerHTML = filtered.map(product => {
-                const stars = Array(5).fill(0).map((_, i) => 
-                    `<i data-lucide="star" class="w-3.5 h-3.5 ${i < product.rating ? 'text-yellow-500 fill-current' : 'text-neutral-600'}"></i>`
-                ).join('');
-
-                const specs = Object.entries(product.specs).slice(0, 2).map(([k, v]) => `
-                    <div class="bg-neutral-800/50 rounded px-2 py-1.5 border border-neutral-800">
-                        <p class="text-[10px] text-gray-500 uppercase tracking-wider">${k}</p>
-                        <p class="text-xs font-medium text-gray-200 truncate">${v}</p>
-                    </div>
-                `).join('');
-
-                return `
-                <div class="group bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-900/10 flex flex-col relative">
-                    ${product.tag ? `<div class="absolute top-3 left-3 z-10 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-lg">${product.tag}</div>` : ''}
-                    
-                    <div class="relative aspect-[5/4] overflow-hidden bg-neutral-800">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100" onerror="handleImageError(this)">
-                        <div class="absolute top-3 right-3 bg-neutral-900/80 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-gray-300 border border-neutral-700/50 uppercase tracking-wide">
-                            ${product.specs.type || 'Gear'}
-                        </div>
-                    </div>
-                    
-                    <div class="p-5 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <div class="flex text-yellow-500 gap-0.5">${stars}</div>
-                                <span class="text-xs text-gray-500">(${product.reviews})</span>
-                            </div>
-                            <h3 class="text-lg font-bold text-white mb-2 leading-tight group-hover:text-emerald-400 transition-colors">${product.name}</h3>
-                            <p class="text-gray-400 text-sm mb-4 line-clamp-2 leading-relaxed">${product.description}</p>
-                            <div class="grid grid-cols-2 gap-2 mb-4">${specs}</div>
-                        </div>
-
-                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-neutral-800">
-                            <div>
-                                ${product.oldPrice ? `<span class="text-xs text-gray-500 line-through block mb-0.5">${product.oldPrice.toLocaleString()} ₽</span>` : ''}
-                                <span class="text-xl font-bold text-emerald-400">${product.price.toLocaleString()} ₽</span>
-                            </div>
-                            <button onclick="addToCart(${product.id})" class="bg-neutral-800 hover:bg-emerald-600 text-white w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 group/btn">
-                                <i data-lucide="shopping-cart" class="w-5 h-5 text-emerald-500 group-hover/btn:text-white transition-colors"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-
-            lucide.createIcons();
-        }
-
-        // --- CART LOGIC ---
-        function toggleCart(show) {
-            if (show) {
-                els.cartDrawer.classList.remove('pointer-events-none');
-                els.cartBackdrop.classList.remove('opacity-0');
-                els.cartPanel.classList.remove('translate-x-full');
-            } else {
-                els.cartDrawer.classList.add('pointer-events-none');
-                els.cartBackdrop.classList.add('opacity-0');
-                els.cartPanel.classList.add('translate-x-full');
-            }
-        }
-
-        function addToCart(id) {
-            const product = PRODUCTS.find(p => p.id === id);
-            const existing = cart.find(item => item.id === id);
-            
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ ...product, qty: 1 });
-            }
-            renderCart();
-            toggleCart(true);
-        }
-
-        function removeFromCart(id) {
-            cart = cart.filter(item => item.id !== id);
-            renderCart();
-        }
-
-        function updateQty(id, delta) {
-            const item = cart.find(i => i.id === id);
-            if (item) {
-                item.qty = Math.max(1, item.qty + delta);
-                renderCart();
-            }
-        }
-
-        function renderCart() {
-            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const count = cart.reduce((sum, item) => sum + item.qty, 0);
-
-            // Update Badge
-            if (count > 0) {
-                els.cartBadge.classList.remove('hidden');
-                els.cartBadge.classList.add('inline-flex');
-                els.cartBadge.innerText = count;
-            } else {
-                els.cartBadge.classList.add('hidden');
-                els.cartBadge.classList.remove('inline-flex');
-            }
-
-            els.cartHeaderCount.innerText = `${count} позиций`;
-            els.cartTotal.innerText = `${total.toLocaleString()} ₽`;
-            els.modalTotal.innerText = `${total.toLocaleString()} ₽`;
-
-            if (cart.length === 0) {
-                els.cartFooter.classList.add('hidden');
-                els.cartItems.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full text-gray-500 space-y-4 pt-20">
-                        <div class="p-6 bg-neutral-800 rounded-full opacity-50">
-                            <i data-lucide="shopping-cart" class="w-10 h-10"></i>
-                        </div>
-                        <p class="text-lg font-medium">Корзина пуста</p>
-                        <button onclick="toggleCart(false)" class="text-emerald-500 hover:text-emerald-400 font-bold">Перейти в каталог</button>
-                    </div>`;
-            } else {
-                els.cartFooter.classList.remove('hidden');
-                els.cartItems.innerHTML = cart.map(item => `
-                    <div class="flex gap-4 bg-neutral-800/40 p-3 rounded-xl border border-neutral-800 group hover:border-neutral-700 transition-colors">
-                        <div class="w-20 h-20 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
-                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" onerror="handleImageError(this)">
-                        </div>
-                        <div class="flex-1 flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-bold text-white text-sm line-clamp-2 leading-snug">${item.name}</h4>
-                                <p class="text-emerald-400 font-bold mt-1">${item.price.toLocaleString()} ₽</p>
-                            </div>
-                            <div class="flex items-center justify-between mt-2">
-                                <div class="flex items-center gap-3 bg-neutral-900 rounded-lg p-1 border border-neutral-800">
-                                    <button onclick="updateQty(${item.id}, -1)" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white rounded hover:bg-neutral-800">-</button>
-                                    <span class="text-sm font-bold min-w-[1.5rem] text-center">${item.qty}</span>
-                                    <button onclick="updateQty(${item.id}, 1)" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white rounded hover:bg-neutral-800">+</button>
-                                </div>
-                                <button onclick="removeFromCart(${item.id})" class="text-red-500/50 hover:text-red-500 p-1.5 rounded hover:bg-red-500/10 transition-colors">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            lucide.createIcons();
-        }
-
-        // --- MOBILE MENU ---
-        function toggleMobileMenu(forceState) {
-            const isHidden = els.mobileMenu.classList.contains('hidden');
-            const shouldShow = forceState !== undefined ? forceState : isHidden;
-            
-            if (shouldShow) {
-                els.mobileMenu.classList.remove('hidden');
-            } else {
-                els.mobileMenu.classList.add('hidden');
-            }
-        }
-
-        function scrollToCatalog() {
-            document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // --- MODALS ---
-        function openOrderModal() {
-            toggleCart(false);
-            els.orderModal.classList.remove('hidden');
-        }
-
-        function closeModals() {
-            els.orderModal.classList.add('hidden');
-            els.successModal.classList.add('hidden');
-        }
-
-        function submitOrder(e) {
-            e.preventDefault();
-            els.orderModal.classList.add('hidden');
-            els.successModal.classList.remove('hidden');
-            
-            // Clear cart
-            cart = [];
-            renderCart();
-            
-            // Auto close success modal
+        // Показ категорий
+        function showCategories() {
+            addUserMessage("🔫 Каталог");
             setTimeout(() => {
-                closeModals();
-            }, 5000);
+                const content = `
+                    <p class="text-sm font-bold mb-3 text-blue-400">⚔️ ОРУЖЕЙНАЯ КОМНАТА</p>
+                    <p class="text-sm mb-4">Выберите категорию:</p>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="showProducts('combat')" class="w-full bg-gray-700 hover:bg-gray-600 p-3 rounded text-left text-sm font-medium flex justify-between items-center transition">
+                            <span>🔥 Боевое оружие</span> <span class="text-gray-400">›</span>
+                        </button>
+                        <button onclick="showProducts('traumatic')" class="w-full bg-gray-700 hover:bg-gray-600 p-3 rounded text-left text-sm font-medium flex justify-between items-center transition">
+                            <span>🛡 Травматическое</span> <span class="text-gray-400">›</span>
+                        </button>
+                        <button onclick="showProducts('other')" class="w-full bg-gray-700 hover:bg-gray-600 p-3 rounded text-left text-sm font-medium flex justify-between items-center transition">
+                            <span>📦 Снаряжение</span> <span class="text-gray-400">›</span>
+                        </button>
+                    </div>
+                `;
+                addBotMessage(content);
+            }, 300);
         }
 
-        // Start App
-        init();
+        // Показ товаров в категории
+        function showProducts(category) {
+            let catName = "";
+            if(category === 'combat') catName = "🔥 Боевое оружие";
+            if(category === 'traumatic') catName = "🛡 Травматическое";
+            if(category === 'other') catName = "📦 Снаряжение";
+
+            // Генерируем "Inline" клавиатуру с товарами
+            let buttonsHtml = PRODUCTS[category].map(item => `
+                <button onclick="showProductDetail('${category}', '${item.id}')" class="w-full bg-gray-700 hover:bg-gray-600 p-3 rounded text-left text-sm font-medium mb-2 flex justify-between items-center transition">
+                    <span>${item.name}</span> <span class="text-green-400 text-xs">${item.price} ₽</span>
+                </button>
+            `).join('');
+
+            const content = `
+                <p class="text-sm font-bold mb-2 text-blue-400">📂 ${catName}</p>
+                <div class="flex flex-col">
+                    ${buttonsHtml}
+                </div>
+            `;
+            addBotMessage(content);
+        }
+
+        // Показ деталей товара
+        function showProductDetail(category, productId) {
+            const product = PRODUCTS[category].find(p => p.id === productId);
+            if (!product) return;
+
+            const content = `
+                <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-3 bg-gray-900">
+                <h3 class="text-lg font-bold text-white mb-1">${product.name}</h3>
+                <p class="text-green-400 font-bold mb-3">${product.price} ₽</p>
+                <p class="text-sm text-gray-300 mb-4 whitespace-pre-line">${product.desc}</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="bg-blue-600 hover:bg-blue-500 text-white py-2 rounded font-medium text-sm transition" onclick="alert('Для покупки свяжитесь с оператором: @lkx_kxl')">
+                        🛒 Купить
+                    </button>
+                    <button class="bg-gray-600 hover:bg-gray-500 text-white py-2 rounded font-medium text-sm transition" onclick="showProducts('${category}')">
+                        🔙 Назад
+                    </button>
+                </div>
+            `;
+            addBotMessage(content);
+        }
+
+        // Инфо
+        function showInfo() {
+            addUserMessage("ℹ️ Инфо");
+            setTimeout(() => {
+                const content = `
+                    <p class="text-sm font-bold text-blue-400 mb-2">🔰 TacticalZone Shop</p>
+                    <p class="text-sm text-gray-300">
+                    👤 Оператор: <span class="text-blue-300 select-all">@lkx_kxl</span><br>
+                    🛡 Гарантии: Проверено временем.<br>
+                    📦 Доставка: Анонимно и безопасно (Тайники/Курьер).
+                    </p>
+                `;
+                addBotMessage(content);
+            }, 300);
+        }
+
+        // Анимация при старте
+        window.onload = () => {
+            scrollToBottom();
+        }
     </script>
 </body>
 </html>
