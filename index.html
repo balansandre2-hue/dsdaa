@@ -20,7 +20,7 @@
                         surface: '#1c1c1c',
                         border: '#333333',
                         text: '#e5e5e5',
-                        accent: '#3b82f6', // Синий акцент для строгости
+                        accent: '#3b82f6',
                         success: '#22c55e'
                     }
                 }
@@ -63,6 +63,7 @@
         .forum-header { font-size: 11px; color: #888; margin-bottom: 4px; font-weight: 600; }
         
         .trust-badge { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #4ade80; }
+        .info-block { border-left: 4px solid #3b82f6; background: #161616; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -114,17 +115,17 @@
     <!-- Контент -->
     <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
         <!-- Информационная плашка -->
-        <div class="mb-8 border border-gray-800 bg-[#151515] p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 rounded-sm">
-            <div class="flex items-center gap-3">
-                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <div class="text-xs text-gray-400">
-                    <span class="text-gray-500">СТАТУС СИСТЕМЫ:</span> <span class="text-green-500 font-bold">РАБОТАЕТ</span>
-                    <span class="mx-2 text-gray-700">|</span>
-                    <span class="text-gray-500">ШИФРОВАНИЕ:</span> <span class="text-blue-500 font-bold">AES-256</span>
-                </div>
-            </div>
-            <div class="text-xs text-gray-500 font-mono">
-                [SECURE_CONNECTION_ESTABLISHED]
+        <div class="mb-8 info-block p-5 rounded-sm shadow-lg">
+            <h2 class="text-lg font-bold text-white mb-2 uppercase tracking-wide flex items-center gap-2">
+                <span class="text-blue-500">🛡️</span> Гарантия Безопасности
+            </h2>
+            <p class="text-sm text-gray-400 leading-relaxed font-medium">
+                Мы предоставляем полную анонимность и конфиденциальность для каждого клиента. Работаем на совесть уже много лет, имеем безупречную репутацию в теневом сегменте. Все сделки проходят через защищенные каналы связи, логи удаляются мгновенно. Ваша безопасность — наш приоритет.
+            </p>
+            <div class="mt-4 flex items-center gap-4 text-xs font-mono text-gray-500 border-t border-[#333] pt-3">
+                <span>STATUS: <span class="text-green-500">SECURE</span></span>
+                <span>ENCRYPTION: <span class="text-blue-500">PGP/AES</span></span>
+                <span>UPTIME: <span class="text-gray-300">99.9%</span></span>
             </div>
         </div>
 
@@ -143,9 +144,9 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
                 <p>&copy; 2026 TACTICAL MARKET. Профессиональный сервис.</p>
                 <div class="flex gap-6 font-medium">
-                    <a href="#" class="hover:text-white transition">ГАРАНТ</a>
-                    <a href="#" class="hover:text-white transition">ПРАВИЛА</a>
-                    <a href="https://t.me/+l4Mt8VCqCf42ZDU5" target="_blank" class="hover:text-blue-400 transition">ОТЗЫВЫ КЛИЕНТОВ</a>
+                    <button onclick="openTextModal('garant')" class="hover:text-white transition uppercase">Гарант</button>
+                    <button onclick="openTextModal('rules')" class="hover:text-white transition uppercase">Правила</button>
+                    <a href="https://t.me/+l4Mt8VCqCf42ZDU5" target="_blank" class="hover:text-blue-400 transition uppercase">Отзывы Клиентов</a>
                 </div>
             </div>
         </div>
@@ -324,7 +325,7 @@
                             <span id="inv-rub" class="text-white font-bold"></span>
                         </div>
                         <div class="flex justify-between mb-4">
-                            <span class="text-gray-500">К оплате (CRYPTO):</span>
+                            <span class="text-gray-400">К оплате (CRYPTO):</span>
                             <span id="inv-crypto" class="text-green-400 font-bold"></span>
                         </div>
                         <div class="pt-2">
@@ -341,6 +342,20 @@
         </div>
     </div>
 
+    <!-- Модальное окно: Информация (Гарант/Правила) -->
+    <div id="info-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0" onclick="closeInfoModal()"></div>
+        <div class="relative bg-[#1c1c1c] w-full max-w-lg border border-[#333] shadow-2xl flex flex-col max-h-[90vh] rounded-sm">
+            <div class="flex justify-between items-center px-5 py-3 border-b border-[#333] bg-[#181818]">
+                <h3 id="info-title" class="font-bold text-gray-300 text-sm tracking-wide">ИНФОРМАЦИЯ</h3>
+                <button onclick="closeInfoModal()" class="text-gray-500 hover:text-white font-mono">[x]</button>
+            </div>
+            <div class="overflow-y-auto p-6 custom-scrollbar bg-[#111]">
+                <div id="info-content" class="text-gray-300 text-sm leading-relaxed whitespace-pre-line font-light"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Уведомления -->
     <div id="toast-container" class="fixed bottom-5 right-5 flex flex-col gap-2 z-50"></div>
 
@@ -352,7 +367,7 @@
             { id: "c4", cat: "combat", name: "SVD [DRAGUNOV]", price: 85000, icon: "🎯", badge: null, rating: "5.0", desc: "Снайперская винтовка. В комплекте ПСО-1 (сетка целая). Чехол.\nКалибр: 7.62x54R", reviews: [{u:"scope_x",t:"Линзы чистые. Работает как часы.",r:5}] },
             { id: "c5", cat: "combat", name: "PM [MAKAROV]", price: 25000, icon: "⭐", badge: "TOP", rating: "4.7", desc: "ПМ образца 80-х. Красный зип. Воронение не стерто.\nКалибр: 9x18", reviews: [{u:"anon_99",t:"Классика жанра. В масле.",r:4}] },
             { id: "c6", cat: "combat", name: "TT-33 [TOKAREV]", price: 32000, icon: "🔫", badge: null, rating: "4.9", desc: "Военный выпуск. Без ремонтных клейм. Ствол на штифтах.\nКалибр: 7.62x25", reviews: [{u:"history_buff",t:"Мощная вещь. Пробивает на ура.",r:5}] },
-            { id: "c7", cat: "combat", name: "APS [STECHKIN]", price: 110000, icon: "🧨", badge: "NEW", rating: "5.0", desc: "АПС ранний. Автоматический огонь сохранен (холостой).\nКалибр: 9x18\nКомплект: Кобура-приклад", reviews: [{u:"vip_client",t:"Редкость нереальная. Состояние минт.",r:5}] },
+            { id: "c7", cat: "combat", name: "APS [STECHKIN]", price: 110000, icon: "🧨", badge: "NEW", rating: "5.0", desc: "Автоматический Пистолет Стечкина. Режим авто-огня.\nКалибр: 9x18\nКомплект: Кобура-приклад", reviews: [{u:"vip_client",t:"Редкость нереальная. Состояние минт.",r:5}] },
             
             { id: "t1", cat: "traumatic", name: "OSA PB-4-2", price: 14500, icon: "🛡", badge: null, rating: "4.6", desc: "Комплекс самообороны. Электроспуск. Лазерный целеуказатель.\nКалибр: 18.5x55", reviews: [{u:"def_user",t:"Валит с ног. Проверено.",r:5}] },
             { id: "t2", cat: "traumatic", name: "PM-T [ZID]", price: 65000, icon: "💥", badge: "HIT", rating: "4.8", desc: "Переделка из боевого. Ствол с минимальными преградами.\nКалибр: 9mm PA", reviews: [{u:"killa",t:"Лучший травмат на рынке. Жрет всё.",r:5}] },
@@ -507,6 +522,34 @@
 
         function closeProductModal() { document.getElementById('product-modal').classList.remove('active'); setTimeout(() => document.getElementById('product-modal').classList.add('hidden'), 200); }
         function closeCartModal() { document.getElementById('cart-modal').classList.remove('active'); setTimeout(() => document.getElementById('cart-modal').classList.add('hidden'), 200); clearInterval(timerInt); }
+        function closeInfoModal() { document.getElementById('info-modal').classList.remove('active'); setTimeout(() => document.getElementById('info-modal').classList.add('hidden'), 200); }
+
+        function openTextModal(type) {
+            const titleEl = document.getElementById('info-title');
+            const contentEl = document.getElementById('info-content');
+            const modal = document.getElementById('info-modal');
+            
+            if (type === 'garant') {
+                titleEl.textContent = 'ГАРАНТ СЕРВИС';
+                contentEl.innerText = `Мы предоставляем услуги Гаранта для безопасных сделок.
+                
+                1. Полная анонимность обеих сторон.
+                2. Холдирование средств до получения товара.
+                3. Разрешение спорных ситуаций (арбитраж).
+                
+                Мы работаем на совесть уже много лет и дорожим своей репутацией. Все данные шифруются, логи удаляются мгновенно.`;
+            } else if (type === 'rules') {
+                titleEl.textContent = 'ПРАВИЛА СЕРВИСА';
+                contentEl.innerText = `1. Анонимность: Мы не храним ваши данные.
+                2. Оплата: Принимаем только криптовалюту (USDT, BTC, LTC).
+                3. Доставка: Клады (тайники) или курьерская доставка (через дропов).
+                
+                Мы гарантируем конфиденциальность. Работаем честно и на совесть. Любые попытки деанонимизации запрещены.`;
+            }
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
 
         function toCartView() {
             document.getElementById('view-cart-list').classList.remove('hidden');
