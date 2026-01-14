@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TacticalShop</title>
+    <title>T.M. // MARKETPLACE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         const origWarn = console.warn;
@@ -15,304 +15,337 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { gray: { 850: '#1f2937', 900: '#111827', 950: '#0b0f19' } }
+                    colors: { 
+                        bg: '#0f0f0f',
+                        surface: '#1a1a1a',
+                        border: '#333333',
+                        text: '#cccccc',
+                        accent: '#4ade80' // Terminal green
+                    },
+                    fontFamily: {
+                        mono: ['"Courier New"', 'Courier', 'monospace'],
+                        sans: ['Verdana', 'sans-serif']
+                    }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
-        .modal { transition: opacity 0.2s ease, visibility 0.2s; visibility: hidden; opacity: 0; }
-        .modal.active { visibility: visible; opacity: 1; }
-        body.modal-open { overflow: hidden; }
-        .product-card { transition: all 0.2s ease; }
-        .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
-        .icon-box { background: radial-gradient(circle at center, #1f2937 0%, #111827 100%); }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #111827; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-        .toast { animation: slideIn 0.3s ease-out forwards; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .cart-badge { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        body { background-color: #0f0f0f; color: #cccccc; font-family: Verdana, sans-serif; font-size: 13px; }
+        .font-mono { font-family: 'Courier New', Courier, monospace; }
+        
+        /* Строгий стиль скроллбара */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f0f0f; border-left: 1px solid #333; }
+        ::-webkit-scrollbar-thumb { background: #333; border: 1px solid #0f0f0f; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        /* Убираем скругления и добавляем границы */
+        .btn { border: 1px solid #333; background: #1a1a1a; color: #ccc; transition: all 0.1s; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        .btn:hover { background: #252525; border-color: #555; color: #fff; }
+        .btn:active { background: #333; }
+        
+        .btn-primary { border: 1px solid #166534; background: #052e16; color: #4ade80; }
+        .btn-primary:hover { background: #14532d; border-color: #22c55e; }
+
+        .panel { background: #161616; border: 1px solid #333; }
+        
+        .modal-overlay { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(2px); }
+        .modal { transition: opacity 0.1s ease; }
+        
+        /* Стилизация отзывов под посты форума */
+        .forum-post { border-left: 2px solid #333; padding-left: 10px; margin-bottom: 10px; }
+        .forum-header { font-size: 10px; color: #666; margin-bottom: 4px; font-family: 'Courier New', monospace; }
+        
+        /* Эффект терминала для инпутов */
+        input, select { background: #0a0a0a; border: 1px solid #333; color: #fff; border-radius: 0; font-family: 'Courier New', monospace; }
+        input:focus, select:focus { border-color: #555; outline: none; background: #111; }
+
+        /* Toast notifications */
+        .toast { border: 1px solid #333; background: #111; font-family: 'Courier New', monospace; font-size: 12px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Навигация -->
-    <nav class="bg-gray-900/90 backdrop-blur-md border-b border-gray-800 sticky top-0 z-40">
+    <!-- Верхняя панель -->
+    <nav class="bg-surface border-b border-border sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center gap-2 cursor-pointer" onclick="renderProducts('all')">
-                    <div class="bg-blue-600 text-white font-bold rounded p-1 text-xs">TS</div>
-                    <span class="font-bold text-xl tracking-tight text-white hidden sm:block">TacticalShop</span>
+            <div class="flex items-center justify-between h-14">
+                <!-- Логотип -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="renderProducts('all')">
+                    <div class="w-3 h-3 bg-accent animate-pulse"></div>
+                    <span class="font-mono font-bold text-lg tracking-widest text-white">TM//MARKET</span>
                 </div>
                 
-                <div class="hidden md:flex space-x-1">
-                    <button onclick="renderProducts('all')" class="px-3 py-2 rounded text-sm font-medium hover:bg-gray-800 text-gray-300 transition">Все</button>
-                    <button onclick="renderProducts('combat')" class="px-3 py-2 rounded text-sm font-medium hover:bg-gray-800 text-gray-300 transition">Боевое</button>
-                    <button onclick="renderProducts('traumatic')" class="px-3 py-2 rounded text-sm font-medium hover:bg-gray-800 text-gray-300 transition">Травмат</button>
-                    <button onclick="renderProducts('other')" class="px-3 py-2 rounded text-sm font-medium hover:bg-gray-800 text-gray-300 transition">Снаряжение</button>
+                <!-- Меню категорий -->
+                <div class="hidden md:flex space-x-px bg-border">
+                    <button onclick="renderProducts('all')" class="btn px-4 py-2 hover:bg-surface border-none">ВСЕ ЛОТЫ</button>
+                    <button onclick="renderProducts('combat')" class="btn px-4 py-2 hover:bg-surface border-none">БОЕВОЕ</button>
+                    <button onclick="renderProducts('traumatic')" class="btn px-4 py-2 hover:bg-surface border-none">ОООП</button>
+                    <button onclick="renderProducts('other')" class="btn px-4 py-2 hover:bg-surface border-none">ЗИП/БК</button>
                 </div>
 
+                <!-- Поиск и корзина -->
                 <div class="flex items-center gap-4">
                     <div class="relative hidden sm:block">
-                        <input type="text" id="search" placeholder="Поиск..." class="bg-gray-800 text-sm border border-gray-700 rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-blue-500 w-40 text-gray-300 transition" oninput="handleSearch(this.value)">
+                        <input type="text" id="search" placeholder="SEARCH_QUERY..." class="w-48 py-1 px-2 text-xs">
                     </div>
                     
-                    <!-- Корзина -->
-                    <button onclick="openCart()" class="relative p-2 text-gray-400 hover:text-white transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <span id="cart-count" class="hidden absolute top-0 right-0 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full cart-badge">0</span>
+                    <button onclick="openCart()" class="btn p-2 flex items-center gap-2">
+                        <span>CART</span>
+                        <span id="cart-count" class="bg-border px-1.5 py-0.5 text-[10px] text-white hidden">0</span>
                     </button>
                 </div>
             </div>
         </div>
-        <div class="md:hidden flex gap-2 overflow-x-auto p-2 border-t border-gray-800 bg-gray-950 scrollbar-hide">
-            <button onclick="renderProducts('combat')" class="whitespace-nowrap px-3 py-1 bg-gray-800 rounded-full text-xs border border-gray-700">🔥 Боевое</button>
-            <button onclick="renderProducts('traumatic')" class="whitespace-nowrap px-3 py-1 bg-gray-800 rounded-full text-xs border border-gray-700">🛡 Травмат</button>
-            <button onclick="renderProducts('other')" class="whitespace-nowrap px-3 py-1 bg-gray-800 rounded-full text-xs border border-gray-700">📦 Снаряжение</button>
+        
+        <!-- Мобильное меню -->
+        <div class="md:hidden grid grid-cols-4 border-t border-border bg-black text-[10px]">
+            <button onclick="renderProducts('all')" class="p-2 border-r border-border hover:bg-surface text-center">ALL</button>
+            <button onclick="renderProducts('combat')" class="p-2 border-r border-border hover:bg-surface text-center">CMBT</button>
+            <button onclick="renderProducts('traumatic')" class="p-2 border-r border-border hover:bg-surface text-center">TRMA</button>
+            <button onclick="renderProducts('other')" class="p-2 hover:bg-surface text-center">GEAR</button>
         </div>
     </nav>
 
-    <!-- Контент -->
-    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
-        <!-- Вступление -->
-        <div class="mb-10 text-center space-y-2">
-            <div class="inline-flex items-center gap-2 bg-blue-900/30 border border-blue-800 text-blue-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
-                <span>🛡️</span> Гарантия Анонимности
+    <!-- Основной контент -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full">
+        <!-- Статусная строка -->
+        <div class="mb-6 font-mono text-xs border border-border p-3 bg-black/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+            <div class="text-gray-500">
+                STATUS: <span class="text-accent">ONLINE</span> | ENCRYPTION: <span class="text-accent">AES-256</span> | NODE: <span class="text-blue-400">AMS-3</span>
             </div>
-            <h1 class="text-3xl md:text-4xl font-bold text-white">Профессиональный Арсенал</h1>
-            <p class="text-gray-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-                Все сделки проходят строго конфиденциально. Мы гарантируем полную анонимность клиентов и безопасность доставки. Наш сервис проверен временем и тысячами успешных сделок по всему СНГ.
-            </p>
+            <div class="text-gray-400">
+                <span class="text-yellow-600">[WARN]</span> Работаем только через гарант-сервис или прямую оплату.
+            </div>
         </div>
 
-        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-gray-500">
-            <span class="text-4xl mb-2">🕵️</span>
-            <p>Ничего не найдено</p>
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+        
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-gray-600 font-mono">
+            <span>[NO_DATA_FOUND]</span>
+            <button onclick="handleSearch('')" class="mt-2 text-accent hover:underline text-xs">[RESET_FILTER]</button>
         </div>
     </main>
 
-    <footer class="bg-gray-900 border-t border-gray-800 py-8 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-gray-500 text-sm mb-2">&copy; 2026 TacticalShop. Onion Routing Secured.</p>
-            <div class="flex justify-center gap-4 text-xs text-gray-600">
-                <a href="#" class="hover:text-gray-400">Правила</a>
-                <a href="#" class="hover:text-gray-400">PGP Ключ</a>
-                <a href="https://t.me/+l4Mt8VCqCf42ZDU5" target="_blank" class="hover:text-blue-400">Отзывы</a>
+    <!-- Футер -->
+    <footer class="border-t border-border bg-surface py-6 mt-auto font-mono text-xs text-gray-600">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>&copy; 2026 TACTICAL_MARKET. Onion V3.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-gray-400">[ESCROW]</a>
+                <a href="#" class="hover:text-gray-400">[PGP_KEY]</a>
+                <a href="https://t.me/+l4Mt8VCqCf42ZDU5" target="_blank" class="hover:text-gray-400">[FEEDBACK]</a>
             </div>
         </div>
     </footer>
 
-    <!-- Модальное окно Товара -->
-    <div id="product-modal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm" onclick="closeProductModal()"></div>
-        <div class="relative bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[90vh] overflow-hidden">
-            <div class="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-gray-900/50">
-                <h3 class="text-lg font-bold text-white">Обзор товара</h3>
-                <button onclick="closeProductModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+    <!-- Модальное окно: Просмотр товара -->
+    <div id="product-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0" onclick="closeProductModal()"></div>
+        <div class="relative bg-surface w-full max-w-3xl border border-border shadow-2xl flex flex-col max-h-[90vh]">
+            
+            <div class="flex justify-between items-center px-4 py-2 border-b border-border bg-black">
+                <h3 class="font-mono font-bold text-white text-sm">ITEM_VIEWER.EXE</h3>
+                <button onclick="closeProductModal()" class="text-gray-500 hover:text-white font-mono">[X]</button>
             </div>
-            <div class="overflow-y-auto p-6 custom-scrollbar">
-                <div class="flex flex-col sm:flex-row gap-6 mb-8">
-                    <div class="w-full sm:w-40 h-40 flex-shrink-0 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-center text-6xl shadow-inner">
+
+            <div class="overflow-y-auto p-6 custom-scrollbar bg-[#111]">
+                <div class="flex flex-col md:flex-row gap-6 mb-6">
+                    <!-- Иконка -->
+                    <div class="w-full md:w-48 h-48 bg-black border border-border flex items-center justify-center text-6xl grayscale opacity-80">
                         <span id="pm-icon"></span>
                     </div>
-                    <div class="flex-grow">
+                    
+                    <div class="flex-grow font-mono">
                         <div class="flex justify-between items-start mb-2">
-                            <h2 id="pm-name" class="text-2xl font-bold text-white"></h2>
-                            <span id="pm-badge" class="hidden px-2 py-1 bg-blue-900 text-blue-300 text-[10px] font-bold uppercase rounded tracking-wider"></span>
+                            <h2 id="pm-name" class="text-xl font-bold text-white uppercase tracking-wider"></h2>
+                            <span id="pm-badge" class="hidden px-1.5 py-0.5 border border-gray-600 text-gray-400 text-[10px]"></span>
                         </div>
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="text-yellow-500 text-sm">★★★★★</div>
-                            <span id="pm-rating" class="text-xs text-gray-400"></span>
+                        
+                        <div class="flex items-center gap-2 mb-4 text-xs text-gray-500">
+                            <span>RATING:</span>
+                            <span id="pm-rating" class="text-yellow-600 font-bold"></span>
+                            <span class="text-gray-700">|</span>
+                            <span>ID: <span id="pm-id-display"></span></span>
                         </div>
-                        <p id="pm-price" class="text-3xl font-bold text-blue-500 mb-4 font-mono"></p>
-                        <p id="pm-desc" class="text-gray-400 text-sm leading-relaxed whitespace-pre-line"></p>
+
+                        <div class="mb-4 bg-black border border-border p-3 text-xs text-gray-400 leading-relaxed whitespace-pre-line" id="pm-desc"></div>
+
+                        <div class="flex items-center justify-between mt-auto">
+                            <span id="pm-price" class="text-xl text-accent font-bold"></span>
+                            <button onclick="addToCartCurrent()" class="btn-primary px-6 py-3 font-bold text-xs tracking-wider">ДОБАВИТЬ В ЗАКАЗ</button>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="mb-8 border-t border-gray-800 pt-6">
-                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Отзывы покупателей</h4>
+                <!-- Отзывы -->
+                <div class="border-t border-border pt-4">
+                    <h4 class="font-mono text-xs text-gray-500 mb-3">[ USER_FEEDBACK_LOG ]</h4>
                     <div id="pm-reviews" class="space-y-3"></div>
                 </div>
-
-                <button onclick="addToCartCurrent()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2">
-                    <span>🛒</span> Добавить в корзину
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Модальное окно Корзины/Заказа -->
-    <div id="cart-modal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm" onclick="closeCartModal()"></div>
-        <div class="relative bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl border border-gray-700 flex flex-col max-h-[90vh] overflow-hidden">
+    <!-- Модальное окно: Корзина / Оформление -->
+    <div id="cart-modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0" onclick="closeCartModal()"></div>
+        <div class="relative bg-surface w-full max-w-lg border border-border shadow-2xl flex flex-col max-h-[90vh]">
             
-            <!-- Шапка -->
-            <div class="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-gray-900/50">
-                <h3 id="cart-title" class="text-lg font-bold text-white">Корзина</h3>
-                <button onclick="closeCartModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            <div class="flex justify-between items-center px-4 py-2 border-b border-border bg-black">
+                <h3 id="cart-title" class="font-mono font-bold text-white text-sm">ORDER_MANAGER</h3>
+                <button onclick="closeCartModal()" class="text-gray-500 hover:text-white font-mono">[X]</button>
             </div>
 
-            <div class="overflow-y-auto p-6 custom-scrollbar flex-grow">
+            <div class="overflow-y-auto p-5 custom-scrollbar bg-[#111] flex-grow font-mono">
                 
-                <!-- 1. Список товаров -->
+                <!-- 1. Список -->
                 <div id="view-cart-list">
-                    <div id="cart-items" class="space-y-3 mb-6"></div>
-                    <div id="cart-empty" class="text-center py-10 text-gray-500 hidden">Корзина пуста</div>
+                    <div id="cart-items" class="space-y-2 mb-6"></div>
+                    <div id="cart-empty" class="text-center py-8 text-gray-600 text-xs border border-dashed border-border">[EMPTY_BUFFER]</div>
                     
-                    <div id="cart-summary" class="border-t border-gray-800 pt-4">
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-gray-400">Итого:</span>
-                            <span id="cart-total" class="text-2xl font-bold text-white font-mono">0 ₽</span>
+                    <div id="cart-summary" class="border-t border-border pt-4 mt-4 hidden">
+                        <div class="flex justify-between items-center mb-4 text-sm">
+                            <span class="text-gray-500">TOTAL_SUM:</span>
+                            <span id="cart-total" class="font-bold text-white">0 ₽</span>
                         </div>
-                        <button onclick="toCheckout()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-green-900/20">
-                            Оформить заказ
-                        </button>
+                        <button onclick="toCheckout()" class="btn-primary w-full py-3 font-bold">INITIATE_CHECKOUT</button>
                     </div>
                 </div>
 
-                <!-- 2. Форма данных -->
-                <div id="view-checkout" class="hidden space-y-5">
-                    <div class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer hover:text-white mb-2" onclick="toCartView()">
-                        <span>← Вернуться в корзину</span>
+                <!-- 2. Данные -->
+                <div id="view-checkout" class="hidden space-y-4">
+                    <div class="text-[10px] text-gray-500 cursor-pointer hover:text-white mb-2" onclick="toCartView()">&lt; BACK</div>
+
+                    <div class="bg-blue-900/10 border border-blue-900/30 p-2 text-[10px] text-blue-500">
+                        INFO: Данные шифруются PGP. Логи не ведутся.
                     </div>
 
-                    <div class="bg-blue-900/20 border border-blue-800/50 p-3 rounded-lg flex gap-3 items-start">
-                        <span class="text-xl">🔒</span>
-                        <p class="text-xs text-blue-200 leading-relaxed">Ваши данные шифруются и удаляются сразу после завершения сделки. Email нужен только для отправки чека (необязательно).</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1">LOCATION</label>
+                            <select id="country" class="w-full py-2 px-2 text-xs" onchange="updateCities()">
+                                <option value="ru">RUS (RF)</option>
+                                <option value="ua">UKR (UA)</option>
+                                <option value="kz">KAZ (KZ)</option>
+                                <option value="by">BLR (BY)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1">CITY_NODE</label>
+                            <select id="city" class="w-full py-2 px-2 text-xs"></select>
+                        </div>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Страна</label>
-                                <select id="country" class="w-full bg-gray-800 text-white border border-gray-700 rounded-lg p-3 focus:border-blue-500 outline-none" onchange="updateCities()">
-                                    <option value="ru">🇷🇺 Россия</option>
-                                    <option value="ua">🇺🇦 Украина</option>
-                                    <option value="kz">🇰🇿 Казахстан</option>
-                                    <option value="by">🇧🇾 Беларусь</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Город</label>
-                                <select id="city" class="w-full bg-gray-800 text-white border border-gray-700 rounded-lg p-3 focus:border-blue-500 outline-none"></select>
-                            </div>
-                        </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1">CONTACT_EMAIL (OPTIONAL)</label>
+                        <input type="email" id="email" placeholder="anon@proton.me" class="w-full py-2 px-2 text-xs">
+                    </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Email (Необязательно)</label>
-                            <input type="email" id="email" placeholder="protonmail@example.com" class="w-full bg-gray-800 text-white border border-gray-700 rounded-lg p-3 focus:border-blue-500 outline-none placeholder-gray-600 transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Доставка</label>
-                            <div class="grid grid-cols-2 gap-3">
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="delivery" value="courier" class="peer sr-only" checked>
-                                    <div class="text-center py-3 bg-gray-800 border border-gray-700 rounded-lg peer-checked:border-blue-500 peer-checked:bg-blue-900/20 text-gray-300 peer-checked:text-blue-400 transition">
-                                        <div class="font-bold text-sm">🏃 Курьер</div>
-                                    </div>
-                                </label>
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="delivery" value="drop" class="peer sr-only">
-                                    <div class="text-center py-3 bg-gray-800 border border-gray-700 rounded-lg peer-checked:border-blue-500 peer-checked:bg-blue-900/20 text-gray-300 peer-checked:text-blue-400 transition">
-                                        <div class="font-bold text-sm">📍 Тайник</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Оплата</label>
-                            <div class="space-y-2">
-                                <label class="flex items-center justify-between p-3 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:border-gray-500 transition">
-                                    <span class="flex items-center gap-3"><span class="text-lg">💎</span> USDT (TRC20)</span>
-                                    <input type="radio" name="payment" value="usdt" checked class="accent-blue-500 w-4 h-4">
-                                </label>
-                                <label class="flex items-center justify-between p-3 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:border-gray-500 transition">
-                                    <span class="flex items-center gap-3"><span class="text-lg">₿</span> Bitcoin</span>
-                                    <input type="radio" name="payment" value="btc" class="accent-blue-500 w-4 h-4">
-                                </label>
-                                <label class="flex items-center justify-between p-3 bg-gray-800 border border-gray-700 rounded-lg cursor-pointer hover:border-gray-500 transition">
-                                    <span class="flex items-center gap-3"><span class="text-lg">Ł</span> Litecoin</span>
-                                    <input type="radio" name="payment" value="ltc" class="accent-blue-500 w-4 h-4">
-                                </label>
-                            </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1">DELIVERY_METHOD</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="delivery" value="courier" class="peer sr-only" checked>
+                                <div class="text-center py-2 border border-border peer-checked:bg-border peer-checked:text-white text-gray-500 text-xs hover:border-gray-600 transition">
+                                    COURIER
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="delivery" value="drop" class="peer sr-only">
+                                <div class="text-center py-2 border border-border peer-checked:bg-border peer-checked:text-white text-gray-500 text-xs hover:border-gray-600 transition">
+                                    DEAD_DROP
+                                </div>
+                            </label>
                         </div>
                     </div>
-                    <button onclick="toInvoice()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-green-900/20 mt-4">
-                        Подтвердить и оплатить
-                    </button>
+
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1">PAYMENT_GATEWAY</label>
+                        <div class="space-y-1">
+                            <label class="flex items-center justify-between p-2 border border-border cursor-pointer hover:bg-black">
+                                <span class="flex items-center gap-2 text-xs">USDT (TRC20)</span>
+                                <input type="radio" name="payment" value="usdt" checked class="accent-green-500">
+                            </label>
+                            <label class="flex items-center justify-between p-2 border border-border cursor-pointer hover:bg-black">
+                                <span class="flex items-center gap-2 text-xs">BITCOIN (BTC)</span>
+                                <input type="radio" name="payment" value="btc" class="accent-green-500">
+                            </label>
+                            <label class="flex items-center justify-between p-2 border border-border cursor-pointer hover:bg-black">
+                                <span class="flex items-center gap-2 text-xs">LITECOIN (LTC)</span>
+                                <input type="radio" name="payment" value="ltc" class="accent-green-500">
+                            </label>
+                        </div>
+                    </div>
+
+                    <button onclick="toInvoice()" class="btn-primary w-full py-3 mt-2 font-bold">CONFIRM_ORDER</button>
                 </div>
 
                 <!-- 3. Инвойс -->
-                <div id="view-invoice" class="hidden text-center py-4">
-                    <div class="w-16 h-16 bg-blue-900/30 text-blue-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 animate-pulse">🧾</div>
-                    <h3 class="text-xl font-bold text-white mb-1">Ожидание оплаты</h3>
-                    <div id="timer" class="text-3xl font-mono text-red-500 font-bold mb-6 tracking-widest">15:00</div>
+                <div id="view-invoice" class="hidden text-center">
+                    <h3 class="text-sm font-bold text-white mb-2 uppercase border-b border-border pb-2">Awaiting Payment</h3>
+                    <div id="timer" class="text-xl text-red-600 font-bold mb-4 animate-pulse">15:00</div>
                     
-                    <div class="bg-black/30 border border-gray-700 p-5 rounded-xl text-left mb-6">
-                        <div class="flex justify-between mb-2 text-sm">
-                            <span class="text-gray-400">Сумма (RUB):</span>
-                            <span id="inv-rub" class="font-bold text-white"></span>
+                    <div class="bg-black border border-border p-4 text-left mb-4 font-mono text-xs">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-500">FIAT_AMOUNT:</span>
+                            <span id="inv-rub" class="text-white"></span>
                         </div>
-                        <div class="flex justify-between mb-4 text-sm">
-                            <span class="text-gray-400">К оплате:</span>
-                            <span id="inv-crypto" class="font-bold text-green-400 font-mono"></span>
+                        <div class="flex justify-between mb-4">
+                            <span class="text-gray-500">CRYPTO_AMOUNT:</span>
+                            <span id="inv-crypto" class="text-accent font-bold"></span>
                         </div>
-                        <div class="pt-4 border-t border-gray-700">
-                            <div class="flex justify-between items-end mb-2">
-                                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Кошелек <span id="inv-wallet-name"></span></span>
-                                <span class="text-blue-400 text-xs cursor-pointer hover:text-white transition" onclick="copyWallet()">COPY</span>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded border border-gray-700 break-all font-mono text-xs text-gray-300 select-all cursor-pointer hover:border-blue-500 transition" id="inv-addr" onclick="copyWallet()"></div>
+                        <div class="pt-2 border-t border-border">
+                            <div class="text-[9px] text-gray-600 mb-1">WALLET_ADDRESS (<span id="inv-wallet-name"></span>)</div>
+                            <div class="bg-[#050505] p-2 border border-border break-all text-white cursor-pointer hover:text-accent transition" id="inv-addr" onclick="copyWallet()"></div>
+                            <div class="text-right mt-1"><span class="text-[9px] text-blue-500 cursor-pointer hover:underline" onclick="copyWallet()">[COPY]</span></div>
                         </div>
                     </div>
                     
-                    <button onclick="showToast('Платеж проверяется... Ожидайте.', 'success'); closeCartModal(); cart=[]; updateCartUI();" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 rounded-lg border border-gray-700 transition">Я оплатил</button>
+                    <button onclick="showToast('Transaction verifying...', 'success'); closeCartModal(); cart=[]; updateCartUI();" class="btn w-full py-2">MARK_AS_PAID</button>
                 </div>
 
             </div>
         </div>
     </div>
 
-    <!-- Тосты -->
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="fixed bottom-5 right-5 flex flex-col gap-2 z-50"></div>
 
     <script>
         const PRODUCTS = [
-            { id: "c1", cat: "combat", name: "AK-74M", price: 45000, icon: "⚔️", badge: "HIT", rating: "4.9", desc: "Боевой автомат Калашникова (5.45). Списанное боевое, полная механика.", reviews: [{u:"Alex",t:"Все четко.",r:5}, {u:"Ivan",t:"Смазка заводская.",r:5}] },
-            { id: "c2", cat: "combat", name: "АКС-74У", price: 52000, icon: "🌪", badge: null, rating: "5.0", desc: "Укороченный автомат (Ксюха). Идеальное состояние дерева.", reviews: [{u:"Dmitry",t:"В машину самое то.",r:5}] },
-            { id: "c3", cat: "combat", name: "АКМ", price: 48000, icon: "🔥", badge: "RARE", rating: "4.8", desc: "Классика 1960-х (7.62). Пробивает кирпичную кладку.", reviews: [{u:"Oleg",t:"История в руках.",r:5}] },
-            { id: "c4", cat: "combat", name: "СВД", price: 85000, icon: "🎯", badge: null, rating: "5.0", desc: "Снайперская винтовка Драгунова. Прицел ПСО-1 в комплекте.", reviews: [{u:"Sniper",t:"Оптика чистая.",r:5}] },
-            { id: "c5", cat: "combat", name: "ПМ", price: 25000, icon: "⭐", badge: "TOP", rating: "4.7", desc: "Пистолет Макарова (СССР). Нарезной ствол, воронение.", reviews: [{u:"Max",t:"Классика.",r:4}] },
-            { id: "c6", cat: "combat", name: "ТТ-33", price: 32000, icon: "🔫", badge: null, rating: "4.9", desc: "Тульский Токарев (Военный). Высокая пробиваемость.", reviews: [{u:"Patriot",t:"Мощь.",r:5}] },
-            { id: "c7", cat: "combat", name: "АПС", price: 110000, icon: "🧨", badge: "NEW", rating: "5.0", desc: "Автоматический Пистолет Стечкина. Режим авто-огня.", reviews: [{u:"Coll",t:"Редкость.",r:5}] },
-            { id: "t1", cat: "traumatic", name: "Оса ПБ-4", price: 14500, icon: "🛡", badge: null, rating: "4.6", desc: "Бесствольный травмат (18.5х55). Останавливающий эффект.", reviews: [{u:"Guard",t:"Валит с ног.",r:5}] },
-            { id: "t2", cat: "traumatic", name: "ПМ-Т", price: 65000, icon: "💥", badge: "HIT", rating: "4.8", desc: "Травмат из боевого ПМ. Минимум переделок.", reviews: [{u:"Kirill",t:"Как боевой.",r:5}] },
-            { id: "t3", cat: "traumatic", name: "Grand Power", price: 42000, icon: "🦾", badge: "TOP", rating: "4.9", desc: "Словакия (10х28). Эргономичный и мощный.", reviews: [{u:"Sport",t:"Точный.",r:5}] },
-            { id: "t4", cat: "traumatic", name: "ТТ-Т", price: 28000, icon: "🧱", badge: null, rating: "4.5", desc: "Травмат из ТТ. Историческая харизма.", reviews: [{u:"Hist",t:"Для души.",r:4}] },
-            { id: "o1", cat: "other", name: "Цинк 5.45", price: 45000, icon: "📦", badge: "BULK", rating: "5.0", desc: "1080 шт. Армейский. Стальной сердечник.", reviews: [] },
-            { id: "o2", cat: "other", name: "7.62х39 (50шт)", price: 3800, icon: "💊", badge: null, rating: "4.8", desc: "Для АКМ. Оболочечные.", reviews: [] },
-            { id: "o3", cat: "other", name: "9x18 ПМ (50шт)", price: 3200, icon: "🍬", badge: null, rating: "4.9", desc: "Штатные. Для ПМ/АПС.", reviews: [] },
-            { id: "o4", cat: "other", name: "9x19 Luger", price: 3500, icon: "🔘", badge: null, rating: "4.8", desc: "50 шт. Стандарт НАТО.", reviews: [] },
-            { id: "o5", cat: "other", name: "Кобура Kydex", price: 4500, icon: "👖", badge: "NEW", rating: "4.7", desc: "Скрытое ношение. Формуется под модель.", reviews: [] },
-            { id: "o6", cat: "other", name: "Кейс (Hard)", price: 12000, icon: "🧳", badge: null, rating: "5.0", desc: "Ударопрочный IP67. С поролоном.", reviews: [] }
+            { id: "c1", cat: "combat", name: "AK-74M [IZHMASH]", price: 45000, icon: "⚔️", badge: "HIT", rating: "4.9/5", desc: "Оригинальный образец (СХП). Деактив заводской. Механика в идеале. Документы в комплекте.\nКалибр: 5.45x39\nСостояние: Склад", reviews: [{u:"user_3421",t:"Получил закладкой. Все ровно. Смазка в норме.",r:5}, {u:"ak_lover",t:"Доставка 3 дня. Упаковка - мое почтение.",r:5}] },
+            { id: "c2", cat: "combat", name: "AKS-74U 'KRINKOV'", price: 52000, icon: "🌪", badge: null, rating: "5.0/5", desc: "Укороченная версия. Дерево родное, лак. Номера совпадают.\nКалибр: 5.45x39\nВес: 2.7кг", reviews: [{u:"driver_msk",t:"Для транспортировки самое то. Продавцу респект.",r:5}] },
+            { id: "c3", cat: "combat", name: "AKM [1960s]", price: 48000, icon: "🔥", badge: "RARE", rating: "4.8/5", desc: "Советская классика. Тульский оружейный. Фрезерованная коробка.\nКалибр: 7.62x39", reviews: [{u:"collect_01",t:"Историческая вещь. Тяжелый, надежный.",r:5}] },
+            { id: "c4", cat: "combat", name: "SVD [DRAGUNOV]", price: 85000, icon: "🎯", badge: null, rating: "5.0/5", desc: "Снайперская винтовка. В комплекте ПСО-1 (сетка целая). Чехол.\nКалибр: 7.62x54R", reviews: [{u:"scope_x",t:"Линзы чистые. Работает как часы.",r:5}] },
+            { id: "c5", cat: "combat", name: "PM [MAKAROV]", price: 25000, icon: "⭐", badge: "TOP", rating: "4.7/5", desc: "ПМ образца 80-х. Красный зип. Воронение не стерто.\nКалибр: 9x18", reviews: [{u:"anon_99",t:"Классика жанра. В масле.",r:4}] },
+            { id: "c6", cat: "combat", name: "TT-33 [TOKAREV]", price: 32000, icon: "🔫", badge: null, rating: "4.9/5", desc: "Военный выпуск. Без ремонтных клейм. Ствол на штифтах.\nКалибр: 7.62x25", reviews: [{u:"history_buff",t:"Мощная вещь. Пробивает на ура.",r:5}] },
+            { id: "c7", cat: "combat", name: "APS [STECHKIN]", price: 110000, icon: "🧨", badge: "NEW", rating: "5.0/5", desc: "АПС ранний. Автоматический огонь сохранен (холостой).\nКалибр: 9x18\nКомплект: Кобура-приклад", reviews: [{u:"vip_client",t:"Редкость нереальная. Состояние минт.",r:5}] },
+            
+            { id: "t1", cat: "traumatic", name: "OSA PB-4-2", price: 14500, icon: "🛡", badge: null, rating: "4.6/5", desc: "Комплекс самообороны. Электроспуск. Лазерный целеуказатель.\nКалибр: 18.5x55", reviews: [{u:"def_user",t:"Валит с ног. Проверено.",r:5}] },
+            { id: "t2", cat: "traumatic", name: "PM-T [ZID]", price: 65000, icon: "💥", badge: "HIT", rating: "4.8/5", desc: "Переделка из боевого. Ствол с минимальными преградами.\nКалибр: 9mm PA", reviews: [{u:"killa",t:"Лучший травмат на рынке. Жрет всё.",r:5}] },
+            { id: "t3", cat: "traumatic", name: "GRAND POWER T12", price: 42000, icon: "🦾", badge: "TOP", rating: "4.9/5", desc: "Словакия (не РФ сборка). Полимерная рамка. Мощный ствол.\nКалибр: 10x28", reviews: [{u:"sport_ipsc",t:"Точность на высоте. Эргономика супер.",r:5}] },
+            { id: "t4", cat: "traumatic", name: "TT-T [LEADER]", price: 28000, icon: "🧱", badge: null, rating: "4.5/5", desc: "Травматический ТТ. Переделка ЗиД. Аутентичный вид.\nКалибр: 10x28", reviews: [{u:"old_school",t:"Для души пойдет. Иногда клинит на слабых патронах.",r:4}] },
+
+            { id: "o1", cat: "other", name: "CRATE 5.45x39", price: 45000, icon: "📦", badge: "BULK", rating: "-", desc: "Цинк 1080шт. Герметичный. Армейский запас.\nТип: 7Н6 (ПС)", reviews: [] },
+            { id: "o2", cat: "other", name: "AMMO 7.62x39", price: 3800, icon: "💊", badge: null, rating: "-", desc: "Пачка 50шт. БПЗ/Тула.\nТип: FMJ", reviews: [] },
+            { id: "o3", cat: "other", name: "AMMO 9x18 PM", price: 3200, icon: "🍬", badge: null, rating: "-", desc: "Пачка 50шт. ППО/ПС.\nТип: Стандарт", reviews: [] },
+            { id: "o4", cat: "other", name: "AMMO 9x19 LUGER", price: 3500, icon: "🔘", badge: null, rating: "-", desc: "Пачка 50шт. NATO Standard.", reviews: [] },
+            { id: "o5", cat: "other", name: "KYDEX HOLSTER", price: 4500, icon: "👖", badge: "NEW", rating: "4.7/5", desc: "Внутренняя кобура. Формовка под заказ. Клипса сталь.", reviews: [] },
+            { id: "o6", cat: "other", name: "HARD CASE IP67", price: 12000, icon: "🧳", badge: null, rating: "5.0/5", desc: "Кейс ударопрочный. Поролон кубиками. Влагозащита.", reviews: [] }
         ];
 
-        const LOCATIONS = { ru: ["Москва", "СПБ", "ЕКБ", "Новосибирск"], ua: ["Киев", "Харьков", "Одесса", "Львов"], kz: ["Алматы", "Астана", "Шымкент"], by: ["Минск", "Гомель", "Брест"] };
-        const WALLETS = { usdt: { addr: "TRxXRhED1G12UEF74riYfkxxws8fKEC4Ca", name: "USDT TRC20", rateId: "tether" }, btc: { addr: "bc1qfutymnq0m7ekah54gxjwq00rdstvg6k0duvdl5", name: "Bitcoin", rateId: "bitcoin" }, ltc: { addr: "ltc1qhnqel0z5qfdl8efyztuu6q2wd6puyfu2u56995", name: "Litecoin", rateId: "litecoin" } };
+        const LOCATIONS = { ru: ["MSK", "SPB", "EKB", "NSK"], ua: ["KIEV", "ODESSA", "LVIV"], kz: ["ALMATY", "ASTANA"], by: ["MINSK", "GOMEL"] };
+        const WALLETS = { usdt: { addr: "TRxXRhED1G12UEF74riYfkxxws8fKEC4Ca", name: "TRC20", rateId: "tether" }, btc: { addr: "bc1qfutymnq0m7ekah54gxjwq00rdstvg6k0duvdl5", name: "BTC", rateId: "bitcoin" }, ltc: { addr: "ltc1qhnqel0z5qfdl8efyztuu6q2wd6puyfu2u56995", name: "LTC", rateId: "litecoin" } };
 
         let cart = [];
         let rates = { tether: 98, bitcoin: 9500000, litecoin: 9500 };
         let currentItem = null;
         let timerInt = null;
+
+        function init() {
+            renderProducts('all');
+        }
 
         function renderProducts(filter) {
             const grid = document.getElementById('products-grid');
@@ -325,29 +358,27 @@
                 if (searchQ && !p.name.toLowerCase().includes(searchQ)) return;
 
                 const card = document.createElement('div');
-                card.className = "product-card bg-gray-800 rounded-xl overflow-hidden border border-gray-700 relative cursor-pointer group";
+                card.className = "panel p-4 flex flex-col hover:bg-[#1a1a1a] cursor-pointer group transition-colors";
                 card.onclick = (e) => { if(!e.target.closest('button')) openProduct(p.id); };
 
-                let badgeHTML = p.badge ? `<div class="absolute top-2 right-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded z-10 shadow">${p.badge}</div>` : '';
+                let badgeHTML = p.badge ? `<span class="text-[9px] border border-blue-900 text-blue-400 px-1 ml-2">${p.badge}</span>` : '';
 
                 card.innerHTML = `
-                    ${badgeHTML}
-                    <div class="h-40 w-full icon-box flex items-center justify-center text-7xl group-hover:scale-110 transition duration-300">${p.icon}</div>
-                    <div class="p-4">
-                        <div class="flex justify-between items-start mb-1">
-                            <h3 class="font-bold text-white text-lg leading-tight">${p.name}</h3>
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="text-4xl grayscale opacity-70 group-hover:opacity-100 transition-opacity">${p.icon}</div>
+                        <div class="text-right">
+                            <div class="text-accent font-mono font-bold">${p.price.toLocaleString()} ₽</div>
+                            <div class="text-[9px] text-gray-600">ID: ${p.id.toUpperCase()}</div>
                         </div>
-                        <div class="flex items-center gap-1 mb-3">
-                            <span class="text-yellow-500 text-xs">★★★★★</span>
-                            <span class="text-xs text-gray-500">${p.rating}</span>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-4 line-clamp-2 h-8">${p.desc}</p>
-                        <div class="flex justify-between items-center pt-3 border-t border-gray-700">
-                            <span class="text-blue-400 font-bold font-mono text-lg">${p.price.toLocaleString()} ₽</span>
-                            <button onclick="addToCart('${p.id}'); event.stopPropagation()" class="bg-gray-700 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
-                                + В корзину
-                            </button>
-                        </div>
+                    </div>
+                    <div class="flex items-center mb-1">
+                        <h3 class="font-bold text-gray-300 text-sm group-hover:text-white uppercase">${p.name}</h3>
+                        ${badgeHTML}
+                    </div>
+                    <div class="text-[10px] text-gray-500 mb-3 font-mono">${p.desc.split('\n')[0]}</div>
+                    <div class="mt-auto flex justify-between items-center border-t border-[#333] pt-2">
+                        <span class="text-[10px] text-gray-600">R: ${p.rating}</span>
+                        <button onclick="addToCart('${p.id}'); event.stopPropagation()" class="text-[10px] text-gray-400 hover:text-white uppercase">[+ ADD]</button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -366,11 +397,23 @@
             document.getElementById('pm-price').textContent = currentItem.price.toLocaleString() + ' ₽';
             document.getElementById('pm-desc').textContent = currentItem.desc;
             document.getElementById('pm-rating').textContent = currentItem.rating;
+            document.getElementById('pm-id-display').textContent = currentItem.id.toUpperCase();
             
+            const badgeEl = document.getElementById('pm-badge');
+            if (currentItem.badge) { badgeEl.textContent = currentItem.badge; badgeEl.classList.remove('hidden'); } 
+            else { badgeEl.classList.add('hidden'); }
+
             const rDiv = document.getElementById('pm-reviews');
-            rDiv.innerHTML = currentItem.reviews.length ? currentItem.reviews.map(r => `<div class="bg-gray-800 p-3 rounded-lg border border-gray-700 text-sm"><div class="flex justify-between mb-1"><span class="font-bold text-gray-300">${r.u}</span><span class="text-yellow-500">★ ${r.r}</span></div><p class="text-gray-400 italic">"${r.t}"</p></div>`).join('') : '<p class="text-gray-500 italic">Нет отзывов</p>';
+            rDiv.innerHTML = currentItem.reviews.length ? currentItem.reviews.map(r => `
+                <div class="forum-post">
+                    <div class="forum-header">USER: <span class="text-gray-400">${r.u}</span> | RATE: ${r.r}/5</div>
+                    <p class="text-xs text-gray-400 italic">"${r.t}"</p>
+                </div>`).join('') : '<div class="text-xs text-gray-700">[NO_LOGS]</div>';
             
-            toggleModal('product-modal', true);
+            const modal = document.getElementById('product-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('active'), 10);
+            updateCities();
         }
 
         function addToCartCurrent() { if(currentItem) addToCart(currentItem.id); closeProductModal(); }
@@ -379,17 +422,13 @@
             const prod = PRODUCTS.find(p => p.id === id);
             cart.push(prod);
             updateCartUI();
-            showToast(`Добавлено: ${prod.name}`, 'success');
+            showToast(`ITEM_ADDED: ${prod.name}`, 'success');
         }
 
         function updateCartUI() {
             const badge = document.getElementById('cart-count');
             badge.textContent = cart.length;
-            badge.style.display = cart.length > 0 ? 'block' : 'none';
-            // Animation reset
-            badge.classList.remove('cart-badge');
-            void badge.offsetWidth; 
-            badge.classList.add('cart-badge');
+            badge.style.display = cart.length > 0 ? 'inline-block' : 'none';
         }
 
         function openCart() {
@@ -406,23 +445,25 @@
                 cart.forEach((item, index) => {
                     total += item.price;
                     const el = document.createElement('div');
-                    el.className = "flex justify-between items-center bg-gray-800 p-3 rounded-lg border border-gray-700";
+                    el.className = "flex justify-between items-center border-b border-[#333] py-2 text-xs";
                     el.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">${item.icon}</span>
-                            <div>
-                                <p class="text-sm font-bold text-white">${item.name}</p>
-                                <p class="text-xs text-gray-400">${item.price.toLocaleString()} ₽</p>
-                            </div>
+                        <div class="flex items-center gap-2">
+                            <span class="grayscale text-base">${item.icon}</span>
+                            <span class="text-gray-300 font-mono">${item.name}</span>
                         </div>
-                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-400 text-lg">×</button>
+                        <div class="flex items-center gap-3">
+                            <span class="text-gray-500">${item.price}</span>
+                            <button onclick="removeFromCart(${index})" class="text-red-900 hover:text-red-500">[x]</button>
+                        </div>
                     `;
                     list.appendChild(el);
                 });
             }
             document.getElementById('cart-total').textContent = total.toLocaleString() + ' ₽';
             toCartView();
-            toggleModal('cart-modal', true);
+            const modal = document.getElementById('cart-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('active'), 10);
         }
 
         function removeFromCart(index) {
@@ -431,26 +472,19 @@
             openCart();
         }
 
-        // Modal Logic
-        function toggleModal(id, show) {
-            const el = document.getElementById(id);
-            if(show) { el.classList.add('active'); document.body.classList.add('modal-open'); }
-            else { el.classList.remove('active'); document.body.classList.remove('modal-open'); }
-        }
-        function closeProductModal() { toggleModal('product-modal', false); }
-        function closeCartModal() { toggleModal('cart-modal', false); clearInterval(timerInt); }
+        function closeProductModal() { document.getElementById('product-modal').classList.remove('active'); setTimeout(() => document.getElementById('product-modal').classList.add('hidden'), 200); }
+        function closeCartModal() { document.getElementById('cart-modal').classList.remove('active'); setTimeout(() => document.getElementById('cart-modal').classList.add('hidden'), 200); clearInterval(timerInt); }
 
-        // Checkout Logic
         function toCartView() {
             document.getElementById('view-cart-list').classList.remove('hidden');
             document.getElementById('view-checkout').classList.add('hidden');
             document.getElementById('view-invoice').classList.add('hidden');
-            document.getElementById('cart-title').textContent = "Корзина";
+            document.getElementById('cart-title').textContent = "ORDER_MANAGER";
         }
         function toCheckout() {
             document.getElementById('view-cart-list').classList.add('hidden');
             document.getElementById('view-checkout').classList.remove('hidden');
-            document.getElementById('cart-title').textContent = "Оформление заказа";
+            document.getElementById('cart-title').textContent = "SECURE_CHECKOUT";
             updateCities();
         }
         function toInvoice() {
@@ -460,7 +494,7 @@
             const amount = (total / rates[wallet.rateId]).toFixed(payMethod === 'btc' ? 6 : 4);
 
             document.getElementById('inv-rub').textContent = total.toLocaleString() + ' RUB';
-            document.getElementById('inv-crypto').textContent = `${amount} ${payMethod.toUpperCase()}`;
+            document.getElementById('inv-crypto').textContent = `${amount} ${wallet.name}`;
             document.getElementById('inv-wallet-name').textContent = wallet.name;
             document.getElementById('inv-addr').textContent = wallet.addr;
 
@@ -485,30 +519,32 @@
             clearInterval(timerInt);
             let t = 900; 
             const el = document.getElementById('timer');
-            timerInt = setInterval(() => {
+            const tick = () => {
                 const m = Math.floor(t / 60).toString().padStart(2, '0');
                 const s = (t % 60).toString().padStart(2, '0');
                 el.textContent = `${m}:${s}`;
-                if (--t < 0) clearInterval(timerInt);
-            }, 1000);
+                if (--t < 0) { clearInterval(timerInt); el.textContent = "TIMEOUT"; showToast('SESSION EXPIRED', 'error'); }
+            };
+            tick();
+            timerInt = setInterval(tick, 1000);
         }
 
         function copyWallet() {
             navigator.clipboard.writeText(document.getElementById('inv-addr').textContent);
-            showToast('Адрес скопирован', 'success');
+            showToast('COPIED_TO_CLIPBOARD', 'success');
         }
 
         function showToast(msg, type) {
             const box = document.getElementById('toast-container');
             const el = document.createElement('div');
-            const color = type === 'success' ? 'border-green-500 text-green-400' : 'border-blue-500 text-blue-400';
-            el.className = `toast bg-gray-800 border-l-4 ${color} text-white px-4 py-3 rounded shadow-lg min-w-[200px] text-sm font-medium`;
-            el.textContent = msg;
+            const color = type === 'success' ? 'border-accent text-accent' : 'border-red-800 text-red-500';
+            el.className = `toast p-2 mb-2 bg-black border-l-2 ${color} shadow-lg uppercase tracking-wider`;
+            el.textContent = `> ${msg}`;
             box.appendChild(el);
-            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+            setTimeout(() => { el.remove(); }, 3000);
         }
 
-        renderProducts('all');
+        init();
     </script>
 </body>
 </html>
