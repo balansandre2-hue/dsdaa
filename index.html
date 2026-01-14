@@ -47,7 +47,6 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        /* Скроллбар для Webkit */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #111827; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
@@ -56,7 +55,6 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Navbar -->
     <nav class="bg-gray-900 border-b border-gray-800 sticky top-0 z-40 shadow-lg backdrop-blur-md bg-opacity-90">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 gap-4">
@@ -68,7 +66,7 @@
 
                 <div class="flex-grow max-w-md mx-4">
                     <div class="relative">
-                        <input type="text" id="search-input" placeholder="Поиск (например: AK, ПМ)..." class="w-full bg-gray-800 text-gray-300 border border-gray-700 rounded-full py-1.5 px-4 pl-10 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition" oninput="handleSearch(this.value)">
+                        <input type="text" id="search-input" placeholder="Поиск..." class="w-full bg-gray-800 text-gray-300 border border-gray-700 rounded-full py-1.5 px-4 pl-10 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition" oninput="handleSearch(this.value)">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
@@ -94,7 +92,6 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div class="text-center mb-10 relative">
             <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-900/20 rounded-full blur-3xl -z-10"></div>
@@ -115,7 +112,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-800 mt-auto">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <p class="text-center text-gray-500 text-sm">
@@ -124,7 +120,6 @@
         </div>
     </footer>
 
-    <!-- Modal -->
     <div id="modal" class="modal opacity-0 pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="modal-overlay absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
         <div class="modal-container bg-gray-900 w-full max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-hidden border border-gray-700 flex flex-col max-h-[90vh]">
@@ -137,7 +132,6 @@
             </div>
 
             <div class="overflow-y-auto p-6 custom-scrollbar bg-gray-900">
-                <!-- Step 1 -->
                 <div id="step-1">
                     <div class="flex gap-4 mb-6 bg-gray-800 p-3 rounded-lg border border-gray-700">
                         <img id="modal-img" src="" class="w-24 h-24 object-cover rounded bg-gray-950" onerror="this.src='https://dummyimage.com/150x150/1f2937/6b7280&text=No+Image'">
@@ -211,7 +205,6 @@
                     <button onclick="goToInvoice()" class="w-full mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-4 rounded-lg shadow-lg transform transition active:scale-[0.98]">Перейти к оплате</button>
                 </div>
 
-                <!-- Step 2 -->
                 <div id="step-2" class="hidden text-center py-2">
                     <div class="flex justify-center mb-4">
                          <div class="w-16 h-16 bg-blue-900/30 text-blue-500 rounded-full flex items-center justify-center text-3xl animate-pulse ring-1 ring-blue-500/50">🧾</div>
@@ -248,20 +241,21 @@
     <div id="toast-container" class="toast-container"></div>
 
     <script>
-        // Используем стабильные URL с Wikimedia Commons
         const PRODUCTS = {
             combat: [
-                { id: "com_ak74m", name: "AK-74M (ИжМаш)", price: 45000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/AK-74_new.jpg/640px-AK-74_new.jpg", badge: "HIT", desc: "Оригинальный боевой автомат.\nСписанное боевое, не охолощенное.\n🛠 ТТХ: Калибр 5.45х39мм." },
-                { id: "com_aks74u", name: "АКС-74У «Ксюха»", price: 52000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/AKS-74U_noBG.png/640px-AKS-74U_noBG.png", badge: null, desc: "Укороченный автомат Калашникова.\nИдеальное состояние, оригинальное дерево.\n🛠 ТТХ: Калибр 5.45х39мм." },
-                { id: "com_akm", name: "АКМ (1960-е)", price: 48000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/AKM_rifle.jpg/640px-AKM_rifle.jpg", badge: "RARE", desc: "Легендарный калибр 7.62.\nПробивает кирпичную кладку.\n🛠 ТТХ: Калибр 7.62х39мм." },
+                { id: "com_ak74m", name: "AK-74M (ИжМаш)", price: 45000, image: "https://i3.guns.ru/forums/icons/forum_pictures/009487/9487484.jpg", badge: "HIT", desc: "Оригинальный боевой автомат.\nСписанное боевое, не охолощенное.\n🛠 ТТХ: Калибр 5.45х39мм." },
+                { id: "com_aks74u", name: "АКС-74У «Ксюха»", price: 52000, image: "https://s.gunsbroker.ru/adv/oholoshchennaya-vintovka-kurs-s-ar-15--shp-ar-15_1763899196.jpg", badge: null, desc: "Укороченный автомат Калашникова.\nИдеальное состояние, оригинальное дерево.\n🛠 ТТХ: Калибр 5.45х39мм." },
+                { id: "com_akm", name: "АКМ (1960-е)", price: 48000, image: "https://i3.guns.ru/forums/icons/forum_pictures/012599/12599570.jpg", badge: "RARE", desc: "Легендарный калибр 7.62.\nПробивает кирпичную кладку.\n🛠 ТТХ: Калибр 7.62х39мм." },
                 { id: "com_svd", name: "СВД (Драгунов)", price: 85000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/SVD_Dragunov_Tiger.jpg/640px-SVD_Dragunov_Tiger.jpg", badge: null, desc: "Снайперская Винтовка Драгунова.\nВ комплекте прицел ПСО-1.\n🛠 ТТХ: Калибр 7.62х54R." },
-                { id: "com_pm", name: "ПМ (Макаров)", price: 25000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Makarov_PM.jpg/640px-Makarov_PM.jpg", badge: "HIT", desc: "Боевой Пистолет Макарова (СССР).\nНарезной ствол, вороненая сталь.\n🛠 ТТХ: Калибр 9х18 ПМ." },
-                { id: "com_tt", name: "ТТ-33 (Тульский)", price: 32000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Tokarev_TT-33.jpg/640px-Tokarev_TT-33.jpg", badge: null, desc: "Пистолет Токарева, военный выпуск.\nОтсутствуют штифты в стволе.\n🛠 ТТХ: Калибр 7.62х25 ТТ." },
-                { id: "com_aps", name: "АПС (Стечкин)", price: 110000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Stechkin_APS.jpg/640px-Stechkin_APS.jpg", badge: "NEW", desc: "Автоматический Пистолет Стечкина.\nРежим автоматического огня.\n🛠 ТТХ: Калибр 9х18 ПМ." }
+                { id: "com_pm", name: "ПМ (Макаров)", price: 25000, image: "https://sun9-28.userapi.com/impg/ZVLEOMIWJu5qadwOilHIgkct0vNbPIpWSqeGEg/4cqcshAJxQ4.jpg?size=1280x960&quality=95&sign=f420c2c8957f184cbec6361f6c675643&c_uniq_tag=dKISlYT-OzgshbmVCZLJRjz_X25Y8kgXgI9z0deMj3g&type=album", badge: "HIT", desc: "Боевой Пистолет Макарова (СССР).\nНарезной ствол, вороненая сталь.\n🛠 ТТХ: Калибр 9х18 ПМ." },
+                { id: "com_tt", name: "ТТ-33 (Тульский)", price: 32000, image: "https://r3.mt.ru/r8/photo3B28/20659307067-0/jpg/bp.jpeg", badge: null, desc: "Пистолет Токарева, военный выпуск.\nОтсутствуют штифты в стволе.\n🛠 ТТХ: Калибр 7.62х25 ТТ." },
+                { id: "com_aps", name: "АПС (Стечкин)", price: 110000, image: "https://avatars.mds.yandex.net/i?id=057b896736395078fdc1a2cf9ebbc4d5_l-5302039-images-thumbs&n=13", badge: "NEW", desc: "Автоматический Пистолет Стечкина.\nРежим автоматического огня.\n🛠 ТТХ: Калибр 9х18 ПМ." }
             ],
             traumatic: [
-                { id: "tr_osa", name: "Оса ПБ-4-1", price: 14500, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/PB-4-1_Osa.jpg/640px-PB-4-1_Osa.jpg", badge: null, desc: "Бесствольный пистолет самообороны.\nМощнейший травмат.\n🛠 ТТХ: 18.5х55мм." },
-                { id: "tr_grand", name: "Grand Power K100", price: 42000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Grand_Power_K100.jpg/640px-Grand_Power_K100.jpg", badge: "TOP", desc: "Словацкий пистолет (сборка РФ).\nЭргономичный, мощный.\n🛠 ТТХ: Калибр 10х28." }
+                { id: "tr_osa", name: "Оса ПБ-4-1", price: 14500, image: "https://i3.guns.ru/forums/icons/forum_pictures/034063/34063731_10661.jpg", badge: null, desc: "Бесствольный пистолет самообороны.\nМощнейший травмат.\n🛠 ТТХ: 18.5х55мм." },
+                { id: "tr_pmt", name: "ПМ-Т (ЗиД)", price: 65000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Makarov_PM.jpg/640px-Makarov_PM.jpg", badge: "HIT", desc: "Травмат на базе боевого ПМ.\nМинимум переделок.\n🛠 ТТХ: 9мм P.A." },
+                { id: "tr_grand", name: "Grand Power K100", price: 42000, image: "https://gunsfriend.ru/wp-content/uploads/a/b/7/ab7346282cd61ba1d253804a674bdcbb.jpg", badge: "TOP", desc: "Словацкий пистолет (сборка РФ).\nЭргономичный, мощный.\n🛠 ТТХ: Калибр 10х28." },
+                { id: "tr_tt_t", name: "ТТ-Т (Лидер)", price: 28000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Tokarev_TT-33.jpg/640px-Tokarev_TT-33.jpg", badge: null, desc: "Травматическая версия ТТ.\nПеределка из боевых образцов.\n🛠 ТТХ: 10х28." }
             ],
             other: [
                 { id: "acc_ammo_545", name: "Цинк 5.45х39", price: 45000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/5.45x39_cartridges.jpg/640px-5.45x39_cartridges.jpg", badge: "BULK", desc: "Армейский герметичный цинк.\nДля AK-74M, АКС-74У.\n🛠 Фасовка: 1080 шт." },
@@ -270,9 +264,11 @@
                 { id: "acc_ammo_918", name: "Патроны 9x18 ПМ", price: 3200, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/9x18mm_Makarov.jpg/640px-9x18mm_Makarov.jpg", badge: "HIT", desc: "Штатный патрон ПМ.\nДля ПМ, АПС.\n🛠 Фасовка: 50 шт." },
                 { id: "acc_ammo_762_25", name: "Патроны 7.62х25 ТТ", price: 4000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/7.62x25mm_Tokarev.jpg/640px-7.62x25mm_Tokarev.jpg", badge: null, desc: "Высокая пробиваемость.\nДля ТТ-33.\n🛠 Фасовка: 50 шт." },
                 { id: "acc_ammo_1845", name: "Патроны 18.5х55", price: 2500, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/18x45_cartridge.jpg/640px-18x45_cartridge.jpg", badge: null, desc: "Травматический патрон.\nДля комплекса Оса.\n🛠 Фасовка: 4 шт." },
-                { id: "acc_ammo_1028", name: "Патроны 10х28", price: 3500, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/9mm_PA_rubber.jpg/640px-9mm_PA_rubber.jpg", badge: null, desc: "Травматический патрон.\nДля Grand Power.\n🛠 Фасовка: 25 шт." },
+                { id: "acc_ammo_1028", name: "Патроны 10х28", price: 3500, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/9mm_PA_rubber.jpg/640px-9mm_PA_rubber.jpg", badge: null, desc: "Травматический патрон.\nДля Grand Power, TT-T.\n🛠 Фасовка: 25 шт." },
+                { id: "acc_ammo_919", name: "Патроны 9x19", price: 3500, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/9x19mm_Parabellum.jpg/640px-9x19mm_Parabellum.jpg", badge: null, desc: "Стандартный пистолетный патрон.\nОболочечная пуля (FMJ). 50 шт.\n🛠 Фасовка: Пачка 50 шт." },
                 { id: "acc_holster", name: "Кобура Kydex", price: 4500, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Kydex_Holster.jpg/640px-Kydex_Holster.jpg", badge: "NEW", desc: "Кастомная кобура из кайдекса.\nСкрытое ношение (IWB).\n🛠 Материал: Kydex 2mm." },
-                { id: "acc_case", name: "Кейс оружейный", price: 12000, image: "https://images.unsplash.com/photo-1541696884-2e4fb8078396?auto=format&fit=crop&w=640&q=80", badge: null, desc: "Ударопрочный, водонепроницаемый.\nПоролоновый ложемент.\n🛠 Защита: IP67." }
+                { id: "acc_case", name: "Кейс оружейный", price: 12000, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Pelican_1750_Case.jpg/640px-Pelican_1750_Case.jpg", badge: null, desc: "Ударопрочный, водонепроницаемый.\nПоролоновый ложемент.\n🛠 Защита: IP67." },
+                { id: "acc_kit", name: "Набор для чистки", price: 3200, image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Cleaning_brush_for_firearms.jpg/640px-Cleaning_brush_for_firearms.jpg", badge: null, desc: "Профессиональный набор для ухода.\n🛠 Состав: Полный комплект." }
             ]
         };
 
@@ -329,7 +325,7 @@
                         el.innerHTML = `
                             <div class="h-48 overflow-hidden relative bg-gray-950">
                                 ${badgeHtml}
-                                <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-500" onerror="this.src='https://dummyimage.com/600x400/1f2937/6b7280&text=No+Image'">
+                                <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-500" loading="lazy" onerror="this.src='https://dummyimage.com/600x400/1f2937/6b7280&text=No+Image'">
                                 <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-80"></div>
                             </div>
                             <div class="p-4 flex-grow flex flex-col relative">
